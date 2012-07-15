@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
+	<classpathentry kind="lib" path="libs/eclipse/com.ibm.icu_4.4.2.v20110823.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.commands_3.6.1.v20120521-2329.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.databinding_1.4.1.v20120521-2329.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.databinding.beans_1.2.200.v20120523-1955.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.databinding.observable_1.4.1.v20120521-2329.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.databinding.property_1.4.100.v20120523-1955.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.jobs_3.5.200.v20120521-2346.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.core.runtime_3.8.0.v20120521-2346.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.equinox.registry_3.5.200.v20120522-1841.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.jface_3.8.0.v20120521-2329.jar" sourcepath="/Users/shorn/springsource/ggts-3.0.0.M2/plugins"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.jface.databinding_1.6.0.v20120521-2329.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.jface.text_3.8.0.v20120531-0600.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.osgi_3.8.0.v20120529-1548.jar"/>
+	<classpathentry kind="lib" path="libs/eclipse/org.eclipse.text_3.5.200.v20120523-1310.jar"/>
+	<classpathentry kind="lib" path="libs/swt/org.eclipse.swt_3.100.0.v4233d.jar"/>
+	<classpathentry kind="lib" path="libs/swt/org.eclipse.swt.cocoa.macosx.x86_64_3.100.0.v4233d.jar"/>
+	<classpathentry kind="lib" path="libs/selenium-server-standalone-2.24.1.jar"/>
+	<classpathentry kind="lib" path="libs/groovy-all-2.0.0-indy.jar"/>
+	<classpathentry kind="lib" path="libs/miglayout-4.0-swt.jar"/>
+	<classpathentry kind="lib" path="libs/miglayout-4.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="target/java/classes"/>
+</classpath>
