@@ -2,15 +2,14 @@ package com.hornmicro.selenium.ui
 
 import net.miginfocom.swt.MigLayout
 
+import org.eclipse.jface.viewers.TableViewer
 import org.eclipse.swt.SWT
+import org.eclipse.swt.browser.Browser
 import org.eclipse.swt.custom.SashForm
 import org.eclipse.swt.events.ControlAdapter
 import org.eclipse.swt.events.ControlEvent
-import org.eclipse.swt.events.PaintEvent
-import org.eclipse.swt.events.PaintListener
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.widgets.Button
-import org.eclipse.swt.widgets.Canvas
 import org.eclipse.swt.widgets.Combo
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Display
@@ -27,6 +26,8 @@ import org.eclipse.swt.widgets.ToolItem
 import com.novocode.naf.swt.custom.LiveSashForm
 
 class MainView extends Composite {
+    TableViewer testCasesViewer
+    TableViewer testCaseViewer
     
     public MainView(Composite parent, int style) {
         super(parent, style)
@@ -40,15 +41,20 @@ class MainView extends Composite {
         
         def label = new Label(this, SWT.NONE)
         label.text = "Base URL"
-        label.setFocus()
         
-        def combo = new Combo(this, SWT.NONE)
-        combo.text = "Hello there mate 2!"
-        combo.items = ["Hello world","Yet another"]
+        
+        final Combo combo = new Combo(this, SWT.NONE)
+        
+        combo.items = ["http://www.wotif.com","http://www.google.com"]
+        combo.select(0)
         combo.layoutData = "span 2, wrap"
         
+        Display.default.asyncExec {
+            combo.setFocus()
+        }
         
-        ToolBar toolBar = new ToolBar (this, SWT.NONE)
+        
+        ToolBar toolBar = new ToolBar (this, SWT.FLAT)
         toolBar.layoutData = "growx, span 2, wrap"
         
         ToolItem item = new ToolItem (toolBar, SWT.SEPARATOR)
@@ -94,7 +100,8 @@ class MainView extends Composite {
         //testCasesHolder.setBackground(Display.default.getSystemColor(SWT.COLOR_BLUE))
         testCasesHolder.layout = new MigLayout("inset 0 4 4 10", "[grow][]", "[fill, grow][][][]")
         
-        final Table testCases = new Table(testCasesHolder, SWT.BORDER | SWT.FULL_SELECTION)
+        testCasesViewer = new TableViewer(testCasesHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
+        final Table testCases = testCasesViewer.table
         testCases.layoutData = "span 2, growx,wrap"
         testCases.setLinesVisible (false)
         testCases.setHeaderVisible (true)
@@ -140,7 +147,8 @@ class MainView extends Composite {
         Composite tableHolder = new Composite(tabFolder, SWT.NONE)
         tableHolder.layout = new MigLayout("inset 2","[][grow][]", "[fill, grow][]")
         
-        Table table = new Table (tableHolder, SWT.BORDER | SWT.FULL_SELECTION)
+        testCaseViewer = new TableViewer(tableHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
+        Table table = testCaseViewer.table 
         table.layoutData = "span 3, growx, wrap"
         table.linesVisible = true
         table.headerVisible = true
@@ -182,15 +190,24 @@ class MainView extends Composite {
         
         form.weights = [30, 70]
         
-        TabFolder footerTabs = new TabFolder(vform, SWT.BORDER);
+        TabFolder footerTabs = new TabFolder(vform, SWT.BORDER)
         TabItem logti = new TabItem(footerTabs, SWT.NONE)
         logti.text = "Log"
+        Browser log = new Browser(footerTabs, SWT.BORDER)
+        log.text = "<h2>Log todo...</h2>"
+        logti.control = log
         
         TabItem refti = new TabItem(footerTabs, SWT.NONE)
         refti.text = "Reference"
+        Browser reference = new Browser(footerTabs, SWT.BORDER)
+        reference.text = "<h2>Reference todo...</h2>"
+        refti.control = reference
         
         TabItem uielti = new TabItem(footerTabs, SWT.NONE)
         uielti.text = "UI-Element"
+        Browser uiElement = new Browser(footerTabs, SWT.BORDER)
+        uiElement.setText("<h2>UI-Element todo...</h2>")
+        uielti.control = uiElement
         
         footerTabs.pack()
         
@@ -198,18 +215,4 @@ class MainView extends Composite {
         
         layout()
     }
-}
-
-class LineSeparator extends Canvas implements PaintListener {
-
-    LineSeparator(parent) {
-        super(parent, SWT.NONE)
-        addPaintListener(this)
-    }
-    
-    public void paintControl(PaintEvent pe) {
-        
-    }
-    
-    
 }

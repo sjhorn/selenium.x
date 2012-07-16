@@ -1,8 +1,13 @@
 package com.hornmicro.selenium.ui
 
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.eclipse.core.databinding.beans.BeanProperties
+import org.eclipse.core.databinding.beans.BeansObservables
+import org.eclipse.core.databinding.observable.value.IObservableValue
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
+import org.eclipse.jface.databinding.viewers.ViewerSupport
+import org.eclipse.jface.databinding.viewers.ViewersObservables
 import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
 import org.eclipse.jface.window.Window.IExceptionHandler
@@ -19,7 +24,9 @@ import com.hornmicro.selenium.actions.ReloadAction
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler {
     Action openAction
     Action reloadAction
-    Composite view
+    
+    TestSuiteModel model = new TestSuiteModel()
+    MainView view
     def parent
     
     public MainController() {
@@ -41,7 +48,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     protected void configureShell(Shell shell) {
         super.configureShell(shell)
         shell.text = "selenium.x"
-        shell.setSize(400, 800)
+        shell.setSize(740, 600)
     }
     
     protected Control createContents(Composite parent) {
@@ -50,7 +57,30 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         view = new MainView(parent, SWT.NONE)
         view.createContents()
         
+        wireView()
         return view
+    }
+    
+    void wireView() {
+        ViewerSupport.bind(
+            view.testCasesViewer,
+            BeansObservables.observeList(model, "testCases"), // list of items
+            BeanProperties.values(["name"] as String[]) // labels
+        )
+        
+        //def selection = ViewerProperties.singleSelection().observe(view.testCasesViewer)
+        /*
+        IObservableValue selection = ViewersObservables
+            .observeSingleSelection(view.testCasesViewer)
+        
+        
+            
+        ViewerSupport.bind(
+            view.testCaseViewer, 
+            BeansObservables.observeList(selection, "tests"), // list of items
+            BeanProperties.values(["command", "target", "value"] as String[]) // labels
+        )
+        */
     }
     
     void reload() {
@@ -58,6 +88,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         view = new MainView(parent, SWT.NONE)
         view.createContents()
         
+        model = new TestSuiteModel()
+        
+        wireView()
         parent.layout()
     }
     
