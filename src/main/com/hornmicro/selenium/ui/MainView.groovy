@@ -26,6 +26,9 @@ import org.eclipse.swt.widgets.ToolItem
 import com.novocode.naf.swt.custom.LiveSashForm
 
 class MainView extends Composite {
+    Combo command
+    Combo target
+    Text value
     TableViewer testCasesViewer
     TableViewer testCaseViewer
     
@@ -160,12 +163,12 @@ class MainView extends Composite {
         
         // Command
         new Label(tableHolder, SWT.NONE).text = "Command"
-        Combo command = new Combo(tableHolder, SWT.NONE)
+        command = new Combo(tableHolder, SWT.NONE)
         command.layoutData = "span 2, wrap, growx"
         
         // Target
         new Label(tableHolder, SWT.NONE).text = "Target"
-        Combo target = new Combo(tableHolder, SWT.NONE)
+        target = new Combo(tableHolder, SWT.NONE)
         target.layoutData = "growx"
         Button find = new Button(tableHolder, SWT.PUSH)
         find.layoutData = "wrap"
@@ -173,7 +176,7 @@ class MainView extends Composite {
         
         // Value
         new Label(tableHolder, SWT.NONE).text = "Value"
-        Text value = new Text(tableHolder, SWT.BORDER)
+        value = new Text(tableHolder, SWT.BORDER)
         value.layoutData = "span 2, growx"
         
         tbItem.control = tableHolder

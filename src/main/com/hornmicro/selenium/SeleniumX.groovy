@@ -15,11 +15,11 @@ class SeleniumX implements Runnable {
     }
     
     void run() {
-        controller.run()
+        Realm.runWithDefault(SWTObservables.getRealm(new Display()), controller)
     }
     
     static main(args) {
-        Realm.runWithDefault(SWTObservables.getRealm(new Display()), new SeleniumX())
+         new SeleniumX().run()
     }
 
 }

@@ -1,13 +1,16 @@
 package com.hornmicro.selenium.ui
 
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.BeansObservables
-import org.eclipse.core.databinding.observable.value.IObservableValue
+import org.eclipse.core.databinding.beans.PojoProperties
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
+import org.eclipse.jface.databinding.swt.WidgetProperties
+import org.eclipse.jface.databinding.viewers.IViewerObservableValue
+import org.eclipse.jface.databinding.viewers.ViewerProperties
 import org.eclipse.jface.databinding.viewers.ViewerSupport
-import org.eclipse.jface.databinding.viewers.ViewersObservables
 import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
 import org.eclipse.jface.window.Window.IExceptionHandler
@@ -62,25 +65,39 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     }
     
     void wireView() {
+        DataBindingContext dbc = new DataBindingContext()
+        
         ViewerSupport.bind(
             view.testCasesViewer,
             BeansObservables.observeList(model, "testCases"), // list of items
             BeanProperties.values(["name"] as String[]) // labels
         )
         
-        //def selection = ViewerProperties.singleSelection().observe(view.testCasesViewer)
-        /*
-        IObservableValue selection = ViewersObservables
-            .observeSingleSelection(view.testCasesViewer)
-        
-        
-            
         ViewerSupport.bind(
-            view.testCaseViewer, 
-            BeansObservables.observeList(selection, "tests"), // list of items
+            view.testCaseViewer,
+            ViewerProperties.singleSelection()
+                .list(BeanProperties.list("tests", ObservableList.class))
+                .observe(view.testCasesViewer),
             BeanProperties.values(["command", "target", "value"] as String[]) // labels
         )
-        */
+        
+        IViewerObservableValue selection = ViewerProperties.singleSelection().observe(view.testCaseViewer)
+        
+        dbc.bindValue(
+            WidgetProperties.selection().observe(view.command),
+            PojoProperties.value("command", String).observeDetail(selection)
+        )
+        
+        dbc.bindValue(
+            WidgetProperties.selection().observe(view.target),
+            PojoProperties.value("target", String).observeDetail(selection)
+        )
+        
+        dbc.bindValue(
+            WidgetProperties.text(SWT.Modify).observe(view.value),
+            PojoProperties.value("value", String).observeDetail(selection)
+        )
+        
     }
     
     void reload() {
