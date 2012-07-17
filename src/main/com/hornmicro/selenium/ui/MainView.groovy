@@ -1,5 +1,6 @@
 package com.hornmicro.selenium.ui
 
+import groovy.transform.CompileStatic
 import net.miginfocom.swt.MigLayout
 
 import org.eclipse.jface.viewers.TableViewer
@@ -8,7 +9,6 @@ import org.eclipse.swt.browser.Browser
 import org.eclipse.swt.custom.SashForm
 import org.eclipse.swt.events.ControlAdapter
 import org.eclipse.swt.events.ControlEvent
-import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.widgets.Combo
 import org.eclipse.swt.widgets.Composite
@@ -25,7 +25,9 @@ import org.eclipse.swt.widgets.ToolItem
 
 import com.novocode.naf.swt.custom.LiveSashForm
 
+//@CompileStatic
 class MainView extends Composite {
+    private Text source
     Label removeTestCase
     Label addTestCase
     Label duplicateTestCase
@@ -42,8 +44,6 @@ class MainView extends Composite {
         super(parent, style)
 
     }
-    
-    
     
     void createContents() {
         setLayout(new MigLayout("inset 2", "[][grow,fill][grow,fill]", "[][][fill,grow]"))
@@ -76,31 +76,30 @@ class MainView extends Composite {
         
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def playAll = new Image(Display.default, "gfx/PlayAll.png")
+        def playAll = ImageFactory.getImage("gfx/PlayAll.png")
         item.image = playAll
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def playOne = new Image(Display.default, "gfx/PlayOne.png")
+        def playOne = ImageFactory.getImage("gfx/PlayOne.png")
         item.image = playOne
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def pause = new Image(Display.default, "gfx/Pause.png")
+        def pause = ImageFactory.getImage("gfx/Pause.png")
         item.image = pause
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def stp = new Image(Display.default, "gfx/Step.png")
+        def stp = ImageFactory.getImage("gfx/Step.png")
         item.image = stp
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def cont = new Image(Display.default, "gfx/Continue.png")
+        def cont = ImageFactory.getImage("gfx/Continue.png")
         item.image = cont
         
-        SashForm vform = new SashForm(this,SWT.VERTICAL)
-        vform.layoutData = "span 3, w 100%"
+        SashForm vform = new SashForm(this, SWT.VERTICAL)
+        vform.layoutData = "span 3, w 100%, wmin 0, hmax 100%-50" // tweak to allow correct layout
         
         LiveSashForm form = new LiveSashForm(vform, SWT.HORIZONTAL)
         //form.setBackground(Display.default.getSystemColor(SWT.COLOR_RED))
-        form.layoutData = ""
         
         //
         // Test Cases
@@ -111,7 +110,7 @@ class MainView extends Composite {
         
         testCasesViewer = new TableViewer(testCasesHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
         final Table testCases = testCasesViewer.table
-        testCases.layoutData = "span 2, growx, wrap"
+        testCases.layoutData = "span 2, growx, wrap, hmax 100%-100"
         testCases.setLinesVisible (false)
         testCases.setHeaderVisible (true)
         
@@ -140,13 +139,13 @@ class MainView extends Composite {
         ].each { name, data ->
             this[name] = new Label(testCaseTools, SWT.NONE)
             this[name].toolTipText = data.tip
-            this[name].image = new Image(Display.default, data.image)
+            this[name].image = ImageFactory.getImage(data.image)
             this[name].cursor = Display.default.getSystemCursor(SWT.CURSOR_HAND)
         }
         
         def bar = new Label(testCasesHolder, SWT.NONE)
         bar.layoutData = "span 2, growx, wrap, gap 0 0 5 5"
-        bar.setBackgroundImage(new Image(Display.default, "gfx/progress-background.png"))
+        bar.setBackgroundImage(ImageFactory.getImage("gfx/progress-background.png"))
         
         new Label(testCasesHolder, SWT.NONE).text = "Runs:"
         Label runs = new Label(testCasesHolder, SWT.NONE)
@@ -170,17 +169,17 @@ class MainView extends Composite {
         TabItem tbItem = new TabItem (tabFolder, SWT.NONE)
         tbItem.text = "Table"
         Composite tableHolder = new Composite(tabFolder, SWT.NONE)
-        tableHolder.layout = new MigLayout("inset 2","[][grow][]", "[fill, grow][]")
+        tableHolder.layout = new MigLayout("inset 2","[][grow][]", "[fill, grow][][][]")
         
         testCaseViewer = new TableViewer(tableHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
         Table table = testCaseViewer.table 
-        table.layoutData = "span 3, growx, wrap"
+        table.layoutData = "span 3, growx, wrap, hmax 100%-100"
         table.linesVisible = true
         table.headerVisible = true
         ["Command", "Target", "Value"].each {
             TableColumn col = new TableColumn (table, SWT.NONE)
             col.text = it
-            col.width = 160
+            col.width = 130
         }
         
         // Command
@@ -198,7 +197,7 @@ class MainView extends Composite {
         
         // Value
         new Label(tableHolder, SWT.NONE).text = "Value"
-        value = new Text(tableHolder, SWT.BORDER)
+        value = new Text(tableHolder, SWT.BORDER )
         value.layoutData = "span 2, growx"
         
         tbItem.control = tableHolder
@@ -206,9 +205,9 @@ class MainView extends Composite {
         // Source
         TabItem tbItem2 = new TabItem (tabFolder, SWT.NONE)
         tbItem2.text = "Source"
-        Text text = new Text(tabFolder, SWT.BORDER | SWT.MULTI)
+        source = new Text(tabFolder, SWT.BORDER |  SWT.H_SCROLL | SWT.V_SCROLL )
        
-        tbItem2.control = text
+        tbItem2.control = source
         
         tabFolder.pack()
         

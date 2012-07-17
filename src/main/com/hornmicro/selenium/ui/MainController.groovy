@@ -17,6 +17,8 @@ import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
 import org.eclipse.jface.window.Window.IExceptionHandler
 import org.eclipse.swt.SWT
+import org.eclipse.swt.events.DisposeEvent
+import org.eclipse.swt.events.DisposeListener
 import org.eclipse.swt.events.MouseAdapter
 import org.eclipse.swt.events.MouseEvent
 import org.eclipse.swt.layout.FillLayout
@@ -30,7 +32,7 @@ import com.hornmicro.selenium.actions.OpenAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
 
-class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler {
+class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
     Action openAction
     Action reloadAction
     Action addTestCaseAction
@@ -58,10 +60,15 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         Display.current?.dispose()
     }
     
+    void widgetDisposed(DisposeEvent de) {
+        ImageFactory.dispose()
+    }
+    
     protected void configureShell(Shell shell) {
         super.configureShell(shell)
         shell.text = "selenium.x"
         shell.setSize(740, 600)
+        shell.addDisposeListener(this)
     }
     
     protected Control createContents(Composite parent) {
@@ -71,6 +78,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         view.createContents()
         
         wireView()
+        
+        model.open(new File("/Users/shorn/dev/selenium.x/test/TestCase.html"))
+        
         return view
     }
     
@@ -120,6 +130,13 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             WidgetProperties.text(SWT.Modify).observe(view.value),
             PojoProperties.value("value", String).observeDetail(selection)
         )
+        
+        // Selenese Source
+        dbc.bindValue(
+            BeanProperties.value("selenese", String).observeDetail(testCaseSelection),
+            WidgetProperties.text(SWT.Modify).observe(view.source),
+        )
+         
         
         // Listen to the add test case tool
         view.addTestCase.addMouseListener(new MouseAdapter() {
@@ -190,7 +207,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         */
         return menuManager
     }
-
+    
+    // Cleanup the groovy proxy noise in the exception
     public void handleException(Throwable e) {
         StackTraceUtils.deepSanitize(e)
         e.printStackTrace()
