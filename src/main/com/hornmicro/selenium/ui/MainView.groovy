@@ -26,6 +26,12 @@ import org.eclipse.swt.widgets.ToolItem
 import com.novocode.naf.swt.custom.LiveSashForm
 
 class MainView extends Composite {
+    Label removeTestCase
+    Label addTestCase
+    Label duplicateTestCase
+    Label clearTestCase
+    Label refreshTestCases
+    
     Combo command
     Combo target
     Text value
@@ -101,11 +107,11 @@ class MainView extends Composite {
         //
         Composite testCasesHolder = new Composite(form, SWT.NONE)
         //testCasesHolder.setBackground(Display.default.getSystemColor(SWT.COLOR_BLUE))
-        testCasesHolder.layout = new MigLayout("inset 0 4 4 10", "[grow][]", "[fill, grow][][][]")
+        testCasesHolder.layout = new MigLayout("inset 0 4 4 10, gap 0", "[grow][]", "[fill, grow][fill][][][]")
         
         testCasesViewer = new TableViewer(testCasesHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
         final Table testCases = testCasesViewer.table
-        testCases.layoutData = "span 2, growx,wrap"
+        testCases.layoutData = "span 2, growx, wrap"
         testCases.setLinesVisible (false)
         testCases.setHeaderVisible (true)
         
@@ -121,9 +127,25 @@ class MainView extends Composite {
             }
         })
         
+        Composite testCaseTools = new Composite(testCasesHolder, SWT.FLAT)
+        testCaseTools.layoutData = "span 2, wrap, gap 0, growx"
+        testCaseTools.layout = new MigLayout("inset 0, gap 0")
+        
+        [
+            addTestCase: [tip: "Add Test Case", image:"gfx/button_add.png"],
+            removeTestCase: [tip: "Remove Test Case", image:"gfx/button_remove.png"],
+            duplicateTestCase: [tip: "Remove Test Case", image:"gfx/button_duplicate.png"],
+            clearTestCase: [tip: "Clear all Test Cases", image:"gfx/button_clear.png"],
+            refreshTestCases: [tip: "Refresh Test Cases", image:"gfx/button_refresh.png"],
+        ].each { name, data ->
+            this[name] = new Label(testCaseTools, SWT.NONE)
+            this[name].toolTipText = data.tip
+            this[name].image = new Image(Display.default, data.image)
+            this[name].cursor = Display.default.getSystemCursor(SWT.CURSOR_HAND)
+        }
         
         def bar = new Label(testCasesHolder, SWT.NONE)
-        bar.layoutData = "span 2, growx, wrap"
+        bar.layoutData = "span 2, growx, wrap, gap 0 0 5 5"
         bar.setBackgroundImage(new Image(Display.default, "gfx/progress-background.png"))
         
         new Label(testCasesHolder, SWT.NONE).text = "Runs:"
@@ -134,7 +156,7 @@ class MainView extends Composite {
         
         new Label(testCasesHolder, SWT.NONE).text = "Failures:"
         Label failures = new Label(testCasesHolder, SWT.NONE)
-        failures.layoutData = "wrap"
+        failures.layoutData = "wrap,gap 0 0 5 5"
         failures.setForeground(Display.default.getSystemColor(SWT.COLOR_RED))
         failures.text = 0
         

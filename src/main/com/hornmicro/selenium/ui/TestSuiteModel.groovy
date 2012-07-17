@@ -6,5 +6,6 @@ import groovy.beans.Bindable
 class TestSuiteModel {
     File file
     String name = ""
-    ObservableList testCases = [ new TestCaseModel()]
+    ObservableList testCases = [ new TestCaseModel() ]
+    TestCaseModel selectedTestCase = testCases[0]
 }

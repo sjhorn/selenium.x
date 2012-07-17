@@ -6,6 +6,6 @@ import groovy.beans.Bindable
 class TestCaseModel {
     File file
     String selenese = ""
-    String name = "Untitled asdfasdf"
+    String name = "Untitled"
     ObservableList tests = [ new TestModel(command:"hello", target:"what", value:"cool") ]
 }

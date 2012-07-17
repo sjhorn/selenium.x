@@ -1,9 +1,10 @@
 package com.hornmicro.selenium.ui
 
+import java.beans.PropertyChangeListener
+
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
-import org.eclipse.core.databinding.beans.BeansObservables
 import org.eclipse.core.databinding.beans.PojoProperties
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
@@ -11,22 +12,29 @@ import org.eclipse.jface.databinding.swt.WidgetProperties
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue
 import org.eclipse.jface.databinding.viewers.ViewerProperties
 import org.eclipse.jface.databinding.viewers.ViewerSupport
+import org.eclipse.jface.viewers.StructuredSelection
 import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
 import org.eclipse.jface.window.Window.IExceptionHandler
 import org.eclipse.swt.SWT
+import org.eclipse.swt.events.MouseAdapter
+import org.eclipse.swt.events.MouseEvent
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Control
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
 
+import com.hornmicro.selenium.actions.AddTestCaseAction
 import com.hornmicro.selenium.actions.OpenAction
 import com.hornmicro.selenium.actions.ReloadAction
+import com.hornmicro.selenium.actions.RemoveTestCaseAction
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler {
     Action openAction
     Action reloadAction
+    Action addTestCaseAction
+    Action removeTestCaseAction
     
     TestSuiteModel model = new TestSuiteModel()
     MainView view
@@ -37,6 +45,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
         openAction = new OpenAction(this)
         reloadAction = new ReloadAction(this)
+        addTestCaseAction = new AddTestCaseAction(this)
+        removeTestCaseAction = new RemoveTestCaseAction(this)
         
         addMenuBar()
         setExceptionHandler(this)
@@ -67,36 +77,77 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
         
+        // Connect testCases to Test Case table
         ViewerSupport.bind(
             view.testCasesViewer,
-            BeansObservables.observeList(model, "testCases"), // list of items
+            BeanProperties.list("testCases", ObservableList).observe(model), // list of testCases
             BeanProperties.values(["name"] as String[]) // labels
         )
         
+        // Observe test case selection
+        IViewerObservableValue testCaseSelection = ViewerProperties.singleSelection().observe(view.testCasesViewer)
+        
+        // Connect testCase selection to Table of commands
         ViewerSupport.bind(
             view.testCaseViewer,
-            ViewerProperties.singleSelection()
-                .list(BeanProperties.list("tests", ObservableList.class))
-                .observe(view.testCasesViewer),
+            BeanProperties.list("tests", ObservableList).observeDetail(testCaseSelection),
             BeanProperties.values(["command", "target", "value"] as String[]) // labels
         )
         
+        // Connect the current test case selection to the TestSuite model. 
+        dbc.bindValue(
+            testCaseSelection,
+            BeanProperties.value("selectedTestCase", TestCaseModel).observe(model) 
+        )
+        
+        // Observe the current command selection
         IViewerObservableValue selection = ViewerProperties.singleSelection().observe(view.testCaseViewer)
         
+        // Two-way link the current command to command text
         dbc.bindValue(
             WidgetProperties.selection().observe(view.command),
             PojoProperties.value("command", String).observeDetail(selection)
         )
         
+        // Two-way link the current command to target text
         dbc.bindValue(
             WidgetProperties.selection().observe(view.target),
             PojoProperties.value("target", String).observeDetail(selection)
         )
         
+        // Two-way link the current command to value text
         dbc.bindValue(
             WidgetProperties.text(SWT.Modify).observe(view.value),
             PojoProperties.value("value", String).observeDetail(selection)
         )
+        
+        // Listen to the add test case tool
+        view.addTestCase.addMouseListener(new MouseAdapter() {
+            void mouseUp(MouseEvent e) {
+                MainController.this.addTestCaseAction.run()
+            }
+        })
+        
+        // Listen to the remove test case tool
+        view.removeTestCase.addMouseListener(new MouseAdapter() {
+            void mouseUp(MouseEvent e) {
+                MainController.this.removeTestCaseAction.run()
+            }
+        })
+        
+        // Select the first command when we change test cases
+        model.addPropertyChangeListener("selectedTestCase", [ propertyChange: { e ->
+            if(model?.selectedTestCase?.tests?.size()) { 
+                Display.default.asyncExec { 
+                    view.testCaseViewer.setSelection(new StructuredSelection(model.selectedTestCase.tests[0]), true);
+                }
+            }
+        }] as PropertyChangeListener)
+        if(model?.selectedTestCase?.tests?.size()) {
+            Display.default.asyncExec {
+                view.testCaseViewer.setSelection(new StructuredSelection(model.selectedTestCase.tests[0]), true);
+            }
+        }
         
     }
     
