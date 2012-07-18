@@ -10,10 +10,14 @@ class TestCaseModel {
     String name = "Untitled"
     String baseURL = ""
     ObservableList tests = [ new TestModel(command:"hello", target:"what", value:"cool") ]
+    TestModel selectedTest
     
     
     static TestCaseModel load(File file, String source=null, Node html=null) {
         if(source == null || html == null) {
+            if(!file.exists()) {
+                return null
+            }
             source = file.text
             html = new XmlParser(new Parser()).parseText(source)
         }

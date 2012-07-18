@@ -86,13 +86,19 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
         wireView()
         
-        model.open(new File("/Users/shorn/dev/selenium.x/test/TestCase.html"))
+        model.open(new File("/Users/shorn/dev/selenium.x/test/Test Suite"))
         
         return view
     }
     
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
+        
+        // Bind TestSuite name to shell title
+        dbc.bindValue(
+            PojoProperties.value("text").observe(view.shell),
+            BeanProperties.value("name").observe(model)
+        )
         
         // Connect testCases to Test Case table
         ViewerSupport.bind(
@@ -131,6 +137,11 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
 
         // Observe the current command selection
         IViewerObservableValue selection = ViewerProperties.singleSelection().observe(view.testCaseViewer)
+        
+        dbc.bindValue(
+            BeanProperties.value("selectedTest").observe(model.selectedTestCase),
+            selection
+        )
         
         // Two-way link the current command to command text
         dbc.bindValue(

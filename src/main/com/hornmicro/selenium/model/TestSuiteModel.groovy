@@ -7,7 +7,7 @@ import org.ccil.cowan.tagsoup.Parser
 class TestSuiteModel {
     Boolean dirty = false
     File file
-    String name = ""
+    String name = "Test Suite"
     ObservableList testCases = new ObservableList([ new TestCaseModel() ])
     TestCaseModel selectedTestCase = testCases[0]
     
@@ -26,15 +26,34 @@ class TestSuiteModel {
                 return new Status(success:true, code:0, message:"All good")
                 
             } else if(table && table.size() && table.@id?.get(0) == 'suiteTable') {
-                
-                
-            
-                return new Status(success:true, code:0, message:"All good")
+                this.name = html.'**'?.b?.get(0)?.text()
+                List testCases = [] 
+                html.'**'.a.each { a ->
+                    if(a.@href) {
+                        TestCaseModel tcm = TestCaseModel.load(new File(file.getParentFile(), a.@href))
+                        if(tcm) {
+                            testCases.add(tcm)
+                        }
+                    }
+                }
+                setTestCases(new ObservableList(testCases))
+                setSelectedTestCase(this.testCases[0]) 
+                setFile(file)
+                return new Status(success: true, code: 0, message: "All good")
             } else {
-                return new Status(success: false, code:1, message: "Failed to open file $file\n\nIt does not appear to be a Test Suite or Test Case")
+                return new Status(
+                    success: false, 
+                    code: 1, 
+                    message: "Failed to open file $file\n\n"+
+                        "It does not appear to be a Test Suite or Test Case"
+                )
             }
         } else {
-            return new Status(success: false, code:2, message: "Failed to open file $file\n\nI can't seem to find it :(")
+            return new Status(
+                success: false, 
+                code: 2, 
+                message: "Failed to open file $file\n\nI can't seem to find it :("
+            )
         }  
     }
 }
