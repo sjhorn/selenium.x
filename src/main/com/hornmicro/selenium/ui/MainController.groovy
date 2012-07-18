@@ -6,6 +6,11 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.PojoProperties
+import org.eclipse.core.databinding.observable.IObservable
+import org.eclipse.core.databinding.observable.list.IObservableList
+import org.eclipse.core.databinding.observable.list.WritableList
+import org.eclipse.core.databinding.observable.masterdetail.IObservableFactory
+import org.eclipse.core.databinding.observable.masterdetail.MasterDetailObservables
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
 import org.eclipse.jface.databinding.swt.WidgetProperties
@@ -31,6 +36,8 @@ import com.hornmicro.selenium.actions.AddTestCaseAction
 import com.hornmicro.selenium.actions.OpenAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
+import com.hornmicro.selenium.model.TestCaseModel;
+import com.hornmicro.selenium.model.TestSuiteModel;
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
     Action openAction
@@ -57,7 +64,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     void run() {
         blockOnOpen = true
         open()
-        Display.current?.dispose()
+        Display.default?.dispose()
     }
     
     void widgetDisposed(DisposeEvent de) {
@@ -110,6 +117,18 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             BeanProperties.value("selectedTestCase", TestCaseModel).observe(model) 
         )
         
+        // Bind list of BaseURLs from the testcases
+        dbc.bindList(
+            WidgetProperties.items().observe(view.baseURL),
+            BeanProperties.list("testCases").values("baseURL").observe(model)
+        )
+        
+        // Store the values edited back in list
+        dbc.bindValue(
+            WidgetProperties.text().observe(view.baseURL),
+            BeanProperties.value("baseURL", String).observeDetail(testCaseSelection)
+        )
+
         // Observe the current command selection
         IViewerObservableValue selection = ViewerProperties.singleSelection().observe(view.testCaseViewer)
         
@@ -137,7 +156,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             WidgetProperties.text(SWT.Modify).observe(view.source),
         )
          
-        
         // Listen to the add test case tool
         view.addTestCase.addMouseListener(new MouseAdapter() {
             void mouseUp(MouseEvent e) {
@@ -160,11 +178,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                 }
             }
         }] as PropertyChangeListener)
-        if(model?.selectedTestCase?.tests?.size()) {
-            Display.default.asyncExec {
-                view.testCaseViewer.setSelection(new StructuredSelection(model.selectedTestCase.tests[0]), true);
-            }
-        }
         
     }
     
@@ -214,4 +227,12 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         e.printStackTrace()
     }
 
+}
+
+class ObservableListFactory implements IObservableFactory {
+    public IObservable createObservable(Object target) {
+        WritableList list = WritableList.withElementType(String)
+        list.addAll((Collection) target?.baseURL)
+        return list
+    }
 }

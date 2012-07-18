@@ -2,7 +2,7 @@ package com.hornmicro.selenium.actions
 
 import org.eclipse.jface.action.Action
 
-import com.hornmicro.selenium.ui.TestSuiteModel
+import com.hornmicro.selenium.model.TestSuiteModel;
 
 class RemoveTestCaseAction extends Action {
     def controller 

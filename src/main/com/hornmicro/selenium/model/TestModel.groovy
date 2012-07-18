@@ -1,4 +1,4 @@
-package com.hornmicro.selenium.ui
+package com.hornmicro.selenium.model
 
 import groovy.beans.Bindable
 

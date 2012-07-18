@@ -1,9 +1,12 @@
 package com.hornmicro.selenium.actions
 
 import org.eclipse.jface.action.Action
+import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.SWT
-import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.FileDialog
+
+import com.hornmicro.selenium.model.Status
+import com.hornmicro.selenium.model.TestSuiteModel
 
 class OpenAction extends Action {
     def controller
@@ -17,7 +20,7 @@ class OpenAction extends Action {
     }
     
     void run() {
-        def model = controller.model
+        TestSuiteModel model = controller.model
         def shell = controller.shell
 
         FileDialog dlg = new FileDialog(shell, SWT.OPEN)
@@ -26,7 +29,10 @@ class OpenAction extends Action {
         String fileName = dlg.open()
         
         if (fileName != null /*&& checkOverwrite(model, shell) */ ) {
-            model.open(new File(fileName))
+            Status status = model.open(new File(fileName))
+            if(!status.success) {
+                MessageDialog.openError(shell, "Open Failed", status.message)
+            }
         }
         
     }

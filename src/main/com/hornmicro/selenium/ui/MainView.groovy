@@ -1,8 +1,8 @@
 package com.hornmicro.selenium.ui
 
-import groovy.transform.CompileStatic
 import net.miginfocom.swt.MigLayout
 
+import org.eclipse.jface.viewers.ComboViewer
 import org.eclipse.jface.viewers.TableViewer
 import org.eclipse.swt.SWT
 import org.eclipse.swt.browser.Browser
@@ -25,9 +25,10 @@ import org.eclipse.swt.widgets.ToolItem
 
 import com.novocode.naf.swt.custom.LiveSashForm
 
-//@CompileStatic
+
 class MainView extends Composite {
-    private Text source
+    Combo baseURL
+    Text source
     Label removeTestCase
     Label addTestCase
     Label duplicateTestCase
@@ -51,15 +52,11 @@ class MainView extends Composite {
         def label = new Label(this, SWT.NONE)
         label.text = "Base URL"
         
-        
-        final Combo combo = new Combo(this, SWT.NONE)
-        
-        combo.items = ["http://www.wotif.com","http://www.google.com"]
-        combo.select(0)
-        combo.layoutData = "span 2, wrap"
+        baseURL = new Combo(this, SWT.NONE)
+        baseURL.layoutData = "span 2, wrap"
         
         Display.default.asyncExec {
-            combo.setFocus()
+            baseURL.setFocus()
         }
         
         
@@ -120,11 +117,11 @@ class MainView extends Composite {
         column.width = 80
         
         
-        testCasesHolder.addControlListener(new ControlAdapter() {
-            void controlResized(ControlEvent e) {
+        testCasesHolder.addControlListener([
+            controlResized: { ControlEvent e -> 
                 column.width = testCasesHolder.bounds.width - 30
             }
-        })
+        ] as ControlAdapter)
         
         Composite testCaseTools = new Composite(testCasesHolder, SWT.FLAT)
         testCaseTools.layoutData = "span 2, wrap, gap 0, growx"
@@ -133,9 +130,11 @@ class MainView extends Composite {
         [
             addTestCase: [tip: "Add Test Case", image:"gfx/button_add.png"],
             removeTestCase: [tip: "Remove Test Case", image:"gfx/button_remove.png"],
+            /*
             duplicateTestCase: [tip: "Remove Test Case", image:"gfx/button_duplicate.png"],
             clearTestCase: [tip: "Clear all Test Cases", image:"gfx/button_clear.png"],
             refreshTestCases: [tip: "Refresh Test Cases", image:"gfx/button_refresh.png"],
+            */
         ].each { name, data ->
             this[name] = new Label(testCaseTools, SWT.NONE)
             this[name].toolTipText = data.tip
@@ -176,10 +175,10 @@ class MainView extends Composite {
         table.layoutData = "span 3, growx, wrap, hmax 100%-100"
         table.linesVisible = true
         table.headerVisible = true
-        ["Command", "Target", "Value"].each {
+        ["Command": 120, "Target": 200, "Value": 100].each { text, width ->
             TableColumn col = new TableColumn (table, SWT.NONE)
-            col.text = it
-            col.width = 130
+            col.text = text
+            col.width = width
         }
         
         // Command
