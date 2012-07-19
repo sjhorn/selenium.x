@@ -2,7 +2,9 @@ package com.hornmicro.selenium.driver
 
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebDriverBackedSelenium
-import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.remote.DesiredCapabilities
+
 import com.thoughtworks.selenium.Selenium
 
 class DriveTest {
@@ -12,15 +14,18 @@ class DriveTest {
     
     static executeAction(baseUrl, command, target="", value="") {
         if(!driver) {
-            driver = new FirefoxDriver()
+            System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
+            DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+            capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
+            driver = new ChromeDriver(capabilities);
         }
         Selenium selenium = new WebDriverBackedSelenium(driver, baseUrl)
         if(target.size() && value.size()) {
-            selenium[command](target,value)
+            selenium."$command"(target, value)
         } else if(target.size()) {
-            selenium[command](target)
+            selenium."$command"(target)
         } else {
-            selenium[command]()
+            selenium."$command"()
         }
     }
     

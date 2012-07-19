@@ -7,10 +7,8 @@ import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.PojoProperties
 import org.eclipse.core.databinding.observable.IObservable
-import org.eclipse.core.databinding.observable.list.IObservableList
 import org.eclipse.core.databinding.observable.list.WritableList
 import org.eclipse.core.databinding.observable.masterdetail.IObservableFactory
-import org.eclipse.core.databinding.observable.masterdetail.MasterDetailObservables
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
 import org.eclipse.jface.databinding.swt.WidgetProperties
@@ -18,6 +16,9 @@ import org.eclipse.jface.databinding.viewers.IViewerObservableValue
 import org.eclipse.jface.databinding.viewers.ViewerProperties
 import org.eclipse.jface.databinding.viewers.ViewerSupport
 import org.eclipse.jface.viewers.StructuredSelection
+import org.eclipse.jface.viewers.StyledCellLabelProvider
+import org.eclipse.jface.viewers.TableViewer
+import org.eclipse.jface.viewers.ViewerCell
 import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
 import org.eclipse.jface.window.Window.IExceptionHandler
@@ -26,6 +27,7 @@ import org.eclipse.swt.events.DisposeEvent
 import org.eclipse.swt.events.DisposeListener
 import org.eclipse.swt.events.MouseAdapter
 import org.eclipse.swt.events.MouseEvent
+import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Control
@@ -33,14 +35,17 @@ import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
 
 import com.hornmicro.selenium.actions.AddTestCaseAction
+import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.OpenAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
-import com.hornmicro.selenium.model.TestCaseModel;
-import com.hornmicro.selenium.model.TestSuiteModel;
+import com.hornmicro.selenium.model.TestCaseModel
+import com.hornmicro.selenium.model.TestModel
+import com.hornmicro.selenium.model.TestSuiteModel
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
     Action openAction
+    Action executeAction
     Action reloadAction
     Action addTestCaseAction
     Action removeTestCaseAction
@@ -53,6 +58,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         super(null)
         
         openAction = new OpenAction(this)
+        executeAction = new ExecuteAction(this)
+        
         reloadAction = new ReloadAction(this)
         addTestCaseAction = new AddTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
@@ -91,6 +98,21 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         return view
     }
     
+    class TestCaseProvider extends StyledCellLabelProvider {
+        void update(ViewerCell cell) {
+            TestModel test = cell.element
+            def col = cell.columnIndex
+            
+            cell.text = 
+                col == 0 ? test.command : 
+                col == 1 ? test.target :
+                col == 2 ? test.value : ""
+            
+            cell.setBackground(Display.default.getSystemColor(SWT.COLOR_YELLOW))    
+            super.update(cell)
+        }
+    }
+    
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
         
@@ -116,6 +138,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             BeanProperties.list("tests", ObservableList).observeDetail(testCaseSelection),
             BeanProperties.values(["command", "target", "value"] as String[]) // labels
         )
+        //view.testCaseViewer.labelProvider(new TestCaseProvider())
         
         // Connect the current test case selection to the TestSuite model. 
         dbc.bindValue(
@@ -139,8 +162,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         IViewerObservableValue selection = ViewerProperties.singleSelection().observe(view.testCaseViewer)
         
         dbc.bindValue(
-            BeanProperties.value("selectedTest").observe(model.selectedTestCase),
-            selection
+            selection,
+            BeanProperties.value("selectedTestCase").value("selectedTest").observe(model)
         )
         
         // Two-way link the current command to command text
@@ -207,6 +230,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         MenuManager menuManager = new MenuManager();
         MenuManager fileMenu = new MenuManager("File")
         MenuManager editMenu = new MenuManager("Edit")
+        MenuManager actionsMenu = new MenuManager("Actions")
         MenuManager helpMenu = new MenuManager("Help")
     
         menuManager.add(fileMenu)
@@ -229,6 +253,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         editMenu.add(new Separator())
         editMenu.add(selectAllAction)
         */
+        menuManager.add(actionsMenu)
+        actionsMenu.add(executeAction)
         return menuManager
     }
     
