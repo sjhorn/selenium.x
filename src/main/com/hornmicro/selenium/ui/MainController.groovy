@@ -9,15 +9,16 @@ import org.eclipse.core.databinding.beans.PojoProperties
 import org.eclipse.core.databinding.observable.IObservable
 import org.eclipse.core.databinding.observable.list.WritableList
 import org.eclipse.core.databinding.observable.masterdetail.IObservableFactory
+import org.eclipse.core.databinding.observable.value.ComputedValue
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
 import org.eclipse.jface.databinding.swt.WidgetProperties
+import org.eclipse.jface.databinding.swt.WidgetValueProperty
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue
 import org.eclipse.jface.databinding.viewers.ViewerProperties
 import org.eclipse.jface.databinding.viewers.ViewerSupport
 import org.eclipse.jface.viewers.StructuredSelection
 import org.eclipse.jface.viewers.StyledCellLabelProvider
-import org.eclipse.jface.viewers.TableViewer
 import org.eclipse.jface.viewers.ViewerCell
 import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
@@ -27,18 +28,22 @@ import org.eclipse.swt.events.DisposeEvent
 import org.eclipse.swt.events.DisposeListener
 import org.eclipse.swt.events.MouseAdapter
 import org.eclipse.swt.events.MouseEvent
-import org.eclipse.swt.graphics.Color
+import org.eclipse.swt.events.SelectionAdapter
+import org.eclipse.swt.events.SelectionEvent
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Control
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
+import org.eclipse.swt.widgets.ToolItem
 
 import com.hornmicro.selenium.actions.AddTestCaseAction
 import com.hornmicro.selenium.actions.ExecuteAction
+import com.hornmicro.selenium.actions.FindAction
 import com.hornmicro.selenium.actions.OpenAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
+import com.hornmicro.selenium.driver.DriveTest
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
 import com.hornmicro.selenium.model.TestSuiteModel
@@ -46,6 +51,7 @@ import com.hornmicro.selenium.model.TestSuiteModel
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
     Action openAction
     Action executeAction
+    Action findAction
     Action reloadAction
     Action addTestCaseAction
     Action removeTestCaseAction
@@ -59,6 +65,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
         openAction = new OpenAction(this)
         executeAction = new ExecuteAction(this)
+        findAction = new FindAction(this)
         
         reloadAction = new ReloadAction(this)
         addTestCaseAction = new AddTestCaseAction(this)
@@ -75,13 +82,14 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     }
     
     void widgetDisposed(DisposeEvent de) {
-        ImageFactory.dispose()
+        DriveTest.dispose()
+        Resources.dispose()
     }
     
     protected void configureShell(Shell shell) {
         super.configureShell(shell)
         shell.text = "selenium.x"
-        shell.setSize(740, 600)
+        shell.setSize(740, 700)
         shell.addDisposeListener(this)
     }
     
@@ -113,8 +121,64 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         }
     }
     
+    static class ToolbarProperties extends WidgetValueProperty {
+        static selection() {
+            return new ToolbarProperties()
+        }
+        
+        private ToolbarProperties() {
+            super(SWT.Selection);
+        }
+    
+        boolean doGetBooleanValue(Object source) {
+            return ((ToolItem) source).getSelection();
+        }
+    
+        void doSetBooleanValue(Object source, boolean value) {
+            ((ToolItem) source).setSelection(value);
+        }
+    
+        String toString() {
+            return "Toolbar.selection <Boolean>"
+        }
+        
+        Object getValueType() {
+            return Boolean.TYPE;
+        }
+    
+        Object doGetValue(Object source) {
+            return doGetBooleanValue(source) ? Boolean.TRUE : Boolean.FALSE;
+        }
+    
+        void doSetValue(Object source, Object value) {
+            if (value == null)
+                value = Boolean.FALSE;
+            doSetBooleanValue(source, ((Boolean) value).booleanValue());
+        }
+    }
+    
+    
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
+        
+        // Bind the selected browser to the TestSuiteModel
+        dbc.bindValue(
+            new ComputedValue() {
+                Object calculate() {
+                    def firefox = ToolbarProperties.selection().observe(view.firefox) 
+                    def chrome = ToolbarProperties.selection().observe(view.firefox)
+                    
+                    if(firefox.getValue()) {
+                        return "firefox"
+                    } else if(chrome.getValue()) {
+                        return "chrome"
+                    }
+                    return "chrome"
+                }
+            },
+            BeanProperties.value("browser").observe(model)
+        )
+        
         
         // Bind TestSuite name to shell title
         dbc.bindValue(
@@ -203,6 +267,15 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                 MainController.this.removeTestCaseAction.run()
             }
         })
+        
+        // Listen to the Find Button
+        view.findTarget.addSelectionListener(new SelectionAdapter() {
+            void widgetSelected(SelectionEvent se) {
+                findAction.run()
+            }
+        })
+        
+        
         
         // Select the first command when we change test cases
         model.addPropertyChangeListener("selectedTestCase", [ propertyChange: { e ->

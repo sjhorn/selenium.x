@@ -6,6 +6,7 @@ import org.ccil.cowan.tagsoup.Parser
 @Bindable
 class TestSuiteModel {
     Boolean dirty = false
+    String browser = "chrome"
     File file
     String name = "Test Suite"
     ObservableList testCases = new ObservableList([ new TestCaseModel() ])

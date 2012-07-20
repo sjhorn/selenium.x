@@ -27,6 +27,16 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 
 class MainView extends Composite {
+    ToolItem firefox
+    ToolItem chrome
+    ToolItem ie8
+    ToolItem ie9
+    ToolItem opera
+    ToolItem iphone
+    ToolItem android
+    
+    Button findTarget
+    Browser logControl
     Combo baseURL
     Text source
     Label removeTestCase
@@ -34,16 +44,66 @@ class MainView extends Composite {
     Label duplicateTestCase
     Label clearTestCase
     Label refreshTestCases
-    
     Combo command
     Combo target
     Text value
     TableViewer testCasesViewer
     TableViewer testCaseViewer
     
+    enum LogLevel {
+        DEBUG, INFO, WARN, ERROR
+    }
+    Log log = new Log()
+    
+    class Log {
+        LogLevel logLevel = LogLevel.INFO
+        def view
+        
+        def debug(String text) {
+            if(logLevel == LogLevel.DEBUG) {
+                doLog("[debug] $text", "black")
+            }
+        }
+        
+        def info(String text) {
+            if(logLevel <= LogLevel.INFO) {
+                doLog("[info] $text", "black")
+            }
+        }
+        
+        def warn(String text) {
+            if(logLevel <= LogLevel.WARN) {
+                doLog("[warn] $text", "yellow")
+            }
+        }
+        
+        def error(String text) {
+            if(logLevel <= LogLevel.ERROR) {
+                doLog("[error] $text", "red")
+            }
+        }
+        
+        def doLog(String text,String color) {
+            text = text.replaceAll('\"','\\\\"')
+            try {
+                view.logControl.evaluate($/
+                    document.body.innerHTML += "<div style='color:${color}; border-bottom:1px solid #ccc'>$text</div>";
+                    window.scrollTo(0, document.body.scrollHeight);
+                /$)
+            } catch(e) {
+                println "\n\n************* FAILED JS\n\n"
+                e.printStackTrace()
+            }
+        }
+        
+        def clear() {
+            view.logControl.text = ""
+        }
+    }
+    
     public MainView(Composite parent, int style) {
         super(parent, style)
-
+        log.view = this
     }
     
     void createContents() {
@@ -73,24 +133,48 @@ class MainView extends Composite {
         
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def playAll = ImageFactory.getImage("gfx/PlayAll.png")
-        item.image = playAll
+        item.image = Resources.getImage("gfx/PlayAll.png")
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def playOne = ImageFactory.getImage("gfx/PlayOne.png")
-        item.image = playOne
+        item.image = Resources.getImage("gfx/PlayOne.png")
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def pause = ImageFactory.getImage("gfx/Pause.png")
-        item.image = pause
+        item.image = Resources.getImage("gfx/Pause.png")
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def stp = ImageFactory.getImage("gfx/Step.png")
-        item.image = stp
+        item.image = Resources.getImage("gfx/Step.png")
         
         item = new ToolItem (toolBar, SWT.PUSH)
-        def cont = ImageFactory.getImage("gfx/Continue.png")
-        item.image = cont
+        item.image = Resources.getImage("gfx/Continue.png")
+        
+        item = new ToolItem (toolBar, SWT.SEPARATOR)
+        
+        firefox = new ToolItem (toolBar, SWT.RADIO)
+        firefox.image = Resources.getImage("gfx/firefox.png")
+        
+        chrome = new ToolItem (toolBar, SWT.RADIO)
+        chrome.image = Resources.getImage("gfx/chrome.png")
+        chrome.selection = true
+        
+        ie8 = new ToolItem (toolBar, SWT.RADIO)
+        ie8.image = Resources.getImage("gfx/ie8.png")
+        ie8.enabled = false
+        
+        ie9 = new ToolItem (toolBar, SWT.RADIO)
+        ie9.image = Resources.getImage("gfx/ie9.png")
+        ie9.enabled = false
+        
+        opera = new ToolItem (toolBar, SWT.RADIO)
+        opera.image = Resources.getImage("gfx/opera.png")
+        opera.enabled = false
+        
+        iphone = new ToolItem (toolBar, SWT.RADIO)
+        iphone.image = Resources.getImage("gfx/iphone.png")
+        iphone.enabled = false
+        
+        android = new ToolItem (toolBar, SWT.RADIO)
+        android.image = Resources.getImage("gfx/android.png")
+        android.enabled = false
         
         SashForm vform = new SashForm(this, SWT.VERTICAL)
         vform.layoutData = "span 3, w 100%, wmin 0, hmax 100%-50" // tweak to allow correct layout
@@ -138,13 +222,13 @@ class MainView extends Composite {
         ].each { name, data ->
             this[name] = new Label(testCaseTools, SWT.NONE)
             this[name].toolTipText = data.tip
-            this[name].image = ImageFactory.getImage(data.image)
+            this[name].image = Resources.getImage(data.image)
             this[name].cursor = Display.default.getSystemCursor(SWT.CURSOR_HAND)
         }
         
         def bar = new Label(testCasesHolder, SWT.NONE)
         bar.layoutData = "span 2, growx, wrap, gap 0 0 5 5"
-        bar.setBackgroundImage(ImageFactory.getImage("gfx/progress-background.png"))
+        bar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
         
         new Label(testCasesHolder, SWT.NONE).text = "Runs:"
         Label runs = new Label(testCasesHolder, SWT.NONE)
@@ -190,9 +274,9 @@ class MainView extends Composite {
         new Label(tableHolder, SWT.NONE).text = "Target"
         target = new Combo(tableHolder, SWT.NONE)
         target.layoutData = "growx"
-        Button find = new Button(tableHolder, SWT.PUSH)
-        find.layoutData = "wrap"
-        find.text = "    Find    "
+        findTarget = new Button(tableHolder, SWT.PUSH)
+        findTarget.layoutData = "wrap"
+        findTarget.text = "    Find    "
         
         // Value
         new Label(tableHolder, SWT.NONE).text = "Value"
@@ -216,9 +300,9 @@ class MainView extends Composite {
         TabFolder footerTabs = new TabFolder(vform, SWT.BORDER)
         TabItem logti = new TabItem(footerTabs, SWT.NONE)
         logti.text = "Log"
-        Browser log = new Browser(footerTabs, SWT.BORDER)
-        log.text = "<h2>Log todo...</h2>"
-        logti.control = log
+        logControl = new Browser(footerTabs, SWT.BORDER)
+        logControl.text = ""
+        logti.control = logControl
         
         TabItem refti = new TabItem(footerTabs, SWT.NONE)
         refti.text = "Reference"
@@ -238,4 +322,6 @@ class MainView extends Composite {
         
         layout()
     }
+    
+    
 }
