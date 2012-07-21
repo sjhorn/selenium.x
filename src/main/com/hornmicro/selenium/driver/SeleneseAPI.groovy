@@ -1,6 +1,88 @@
 package com.hornmicro.selenium.driver
 
+import java.lang.reflect.Method
+
+import org.ccil.cowan.tagsoup.Parser
+
+import com.thoughtworks.selenium.Selenium
+
 class SeleneseAPI {
+    Map<String, CommandDefinition> commands = [:]
+    
+    SeleneseAPI() {
+        Node html = new XmlParser(new Parser()).parse(new File("api/iedoc-core.xml"))
+        Map<String, Method> methods = [:]
+        Selenium.declaredMethods.each { Method method ->
+            methods["${method.name}_${method.parameterTypes.size()}"] = method
+        }
+        
+        // <function name="someName">
+        //   <param name="targetName">description</param>
+        //   <param name="valueName">description</param> -- optional
+        //   <return type="string">description</return> -- optional
+        //   <comment>description for ide here</comment>
+        // </function>
+        html.'**'.function.each { Node function ->
+            def params = [:]
+            function.param.collect { Node param -> 
+                params[param.@name] = new Param(name: param.@name, description: param.text())
+            }
+            Method method = methods["${function.@name}_${params.size()}"]
+            CommandDefinition cd = new CommandDefinition(
+                name: function.@name,
+                returnType: function.return.@type,
+                returnComment: function.return.text(),
+                params: params,
+                comment: function.comment.text(),
+                method: method,
+                invoker: 'direct' 
+            )
+            commands[function.@name] =  cd
+        }
+    }
+    
+    static void main(args) {
+        SeleneseAPI sapi = new SeleneseAPI()
+        sapi.commands.each { k,v ->
+            println "$k -> ${v.method}"
+        }
+    }
+    
+    
+    
+    
+}
+
+class CommandDefinition {
+    enum type { DIRECT, VERIFY, WAITFOR, NOT, ANDWAIT }  
+    String name
+    String returnType
+    String returnComment
+    Map<String, Param> params = [:]
+    String comment
+    
+    Closure invoker
+    Method method
+    
+    def direct(Selenium sel, String target = null, String value = null) {
+        switch(params.size()) {
+            case 0: return method.invoke(sel)
+            case 1: return method.invoke(sel, target)
+            case 2: return method.invoke(sel, target, value)
+        }
+    }
+    
+    def verify(Selenium sel, String target = null, String value = null) {
+        def res = direct(sel, target, value)
+        //if(res == )
+    }
+}
+
+class Param {
+    String name
+    String description
+}
+
 /*
  Command.prototype.getDefinition = function() {
     if (this.command == null) return null;
@@ -142,4 +224,4 @@ _loadSeleniumCommands: function() {
             ....
 
  */
-}
+
