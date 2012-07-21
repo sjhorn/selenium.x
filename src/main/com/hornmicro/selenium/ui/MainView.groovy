@@ -1,8 +1,8 @@
 package com.hornmicro.selenium.ui
 
+import groovy.transform.CompileStatic
 import net.miginfocom.swt.MigLayout
 
-import org.eclipse.jface.viewers.ComboViewer
 import org.eclipse.jface.viewers.TableViewer
 import org.eclipse.swt.SWT
 import org.eclipse.swt.browser.Browser
@@ -25,12 +25,13 @@ import org.eclipse.swt.widgets.ToolItem
 
 import com.novocode.naf.swt.custom.LiveSashForm
 
-
+@CompileStatic
 class MainView extends Composite {
     ToolItem firefox
     ToolItem chrome
     ToolItem ie8
     ToolItem ie9
+    ToolItem safari
     ToolItem opera
     ToolItem iphone
     ToolItem android
@@ -57,7 +58,7 @@ class MainView extends Composite {
     
     class Log {
         LogLevel logLevel = LogLevel.INFO
-        def view
+        MainView view
         
         def debug(String text) {
             if(logLevel == LogLevel.DEBUG) {
@@ -85,14 +86,14 @@ class MainView extends Composite {
         
         def doLog(String text,String color) {
             text = text.replaceAll('\"','\\\\"')
+            text = text.replaceAll("\n",'\\\\n')
             try {
                 view.logControl.evaluate($/
                     document.body.innerHTML += "<div style='color:${color}; border-bottom:1px solid #ccc'>$text</div>";
                     window.scrollTo(0, document.body.scrollHeight);
                 /$)
             } catch(e) {
-                println "\n\n************* FAILED JS\n\n"
-                e.printStackTrace()
+                println "\n\n************* FAILED JS\n\n[${text}]"
             }
         }
         
@@ -106,6 +107,21 @@ class MainView extends Composite {
         log.view = this
     }
     
+    static class TableSizer extends ControlAdapter {
+        TableColumn column
+        Composite testCasesHolder
+        
+        TableSizer(Composite testCasesHolder, TableColumn column) {
+            super();
+            this.column = column;
+            this.testCasesHolder = testCasesHolder;
+        }
+
+        void controlResized( ControlEvent e ) { 
+            column.width = testCasesHolder.getBounds().width - 30
+        }
+    }
+    
     void createContents() {
         setLayout(new MigLayout("inset 2", "[][grow,fill][grow,fill]", "[][][fill,grow]"))
         
@@ -115,7 +131,7 @@ class MainView extends Composite {
         baseURL = new Combo(this, SWT.NONE)
         baseURL.layoutData = "span 2, wrap"
         
-        Display.default.asyncExec {
+        Display.getDefault().asyncExec {
             baseURL.setFocus()
         }
         
@@ -156,6 +172,9 @@ class MainView extends Composite {
         chrome.image = Resources.getImage("gfx/chrome.png")
         chrome.selection = true
         
+        safari = new ToolItem (toolBar, SWT.RADIO)
+        safari.image = Resources.getImage("gfx/safari.png")
+        
         ie8 = new ToolItem (toolBar, SWT.RADIO)
         ie8.image = Resources.getImage("gfx/ie8.png")
         ie8.enabled = false
@@ -185,7 +204,7 @@ class MainView extends Composite {
         //
         // Test Cases
         //
-        Composite testCasesHolder = new Composite(form, SWT.NONE)
+        final Composite testCasesHolder = new Composite(form, SWT.NONE)
         //testCasesHolder.setBackground(Display.default.getSystemColor(SWT.COLOR_BLUE))
         testCasesHolder.layout = new MigLayout("inset 0 4 4 10, gap 0", "[grow][]", "[fill, grow][fill][][][]")
         
@@ -198,33 +217,22 @@ class MainView extends Composite {
         final TableColumn column = new TableColumn (testCases, SWT.NONE)
         column.resizable = false
         column.text = "Test Case"
-        column.width = 80
+        column.width = 200
         
-        
-        testCasesHolder.addControlListener([
-            controlResized: { ControlEvent e -> 
-                column.width = testCasesHolder.bounds.width - 30
-            }
-        ] as ControlAdapter)
+        testCasesHolder.addControlListener(new TableSizer(testCasesHolder, column))
         
         Composite testCaseTools = new Composite(testCasesHolder, SWT.FLAT)
         testCaseTools.layoutData = "span 2, wrap, gap 0, growx"
         testCaseTools.layout = new MigLayout("inset 0, gap 0")
         
-        [
-            addTestCase: [tip: "Add Test Case", image:"gfx/button_add.png"],
-            removeTestCase: [tip: "Remove Test Case", image:"gfx/button_remove.png"],
-            /*
-            duplicateTestCase: [tip: "Remove Test Case", image:"gfx/button_duplicate.png"],
-            clearTestCase: [tip: "Clear all Test Cases", image:"gfx/button_clear.png"],
-            refreshTestCases: [tip: "Refresh Test Cases", image:"gfx/button_refresh.png"],
-            */
-        ].each { name, data ->
-            this[name] = new Label(testCaseTools, SWT.NONE)
-            this[name].toolTipText = data.tip
-            this[name].image = Resources.getImage(data.image)
-            this[name].cursor = Display.default.getSystemCursor(SWT.CURSOR_HAND)
-        }
+        ToolLabels tl = new ToolLabels(testCaseTools)
+        addTestCase = tl.label(tip: "Add Test Case", image:"gfx/button_add.png")
+        removeTestCase = tl.label(tip: "Remove Test Case", image:"gfx/button_remove.png")
+        /*
+        duplicateTestCase = tl.label(tip: "Remove Test Case", image:"gfx/button_duplicate.png")
+        clearTestCase = tl.label(tip: "Clear all Test Cases", image:"gfx/button_clear.png")
+        refreshTestCases = tl.label(tip: "Refresh Test Cases", image:"gfx/button_refresh.png")
+        */
         
         def bar = new Label(testCasesHolder, SWT.NONE)
         bar.layoutData = "span 2, growx, wrap, gap 0 0 5 5"
@@ -233,13 +241,13 @@ class MainView extends Composite {
         new Label(testCasesHolder, SWT.NONE).text = "Runs:"
         Label runs = new Label(testCasesHolder, SWT.NONE)
         runs.layoutData = "wrap"
-        runs.setForeground(Display.default.getSystemColor(SWT.COLOR_GREEN))
+        runs.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GREEN))
         runs.text = "0"
         
         new Label(testCasesHolder, SWT.NONE).text = "Failures:"
         Label failures = new Label(testCasesHolder, SWT.NONE)
         failures.layoutData = "wrap,gap 0 0 5 5"
-        failures.setForeground(Display.default.getSystemColor(SWT.COLOR_RED))
+        failures.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED))
         failures.text = 0
         
         //
@@ -259,7 +267,7 @@ class MainView extends Composite {
         table.layoutData = "span 3, growx, wrap, hmax 100%-100"
         table.linesVisible = true
         table.headerVisible = true
-        ["Command": 120, "Target": 200, "Value": 100].each { text, width ->
+        ["Command": 120, "Target": 200, "Value": 100].each { String text, int width ->
             TableColumn col = new TableColumn (table, SWT.NONE)
             col.text = text
             col.width = width

@@ -47,6 +47,7 @@ class ExecuteAction extends Action {
                         table.getItem(index).setBackground(green)
                     }
                 } catch(e) {
+                    e.printStackTrace()
                     Display.default.asyncExec {
                         log.error(e.message)
                         table.getItem(index).setBackground(red)

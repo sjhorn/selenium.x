@@ -9,6 +9,8 @@ import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
 import org.openqa.selenium.remote.DesiredCapabilities
+import org.openqa.selenium.remote.RemoteWebDriver
+import org.openqa.selenium.safari.SafariDriver
 
 import com.thoughtworks.selenium.Selenium
 
@@ -16,7 +18,6 @@ class DriveTest {
     static List methods = Selenium.declaredMethods*.name
     static Boolean highlight = true
     static Map drivers = [:]
-    static WebDriver driver
     
     static void loadDriver(String browser) {
         switch(browser.toLowerCase()) {
@@ -26,11 +27,15 @@ class DriveTest {
                 capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
             
                 drivers['chrome'] = new ChromeDriver(capabilities)
-                break;
+                break
                 
             case 'firefox':
-                drivers['firefox'] = new FirefoxDriver();
-                break;
+                drivers['firefox'] = new FirefoxDriver()
+                break
+                
+            case 'safari':
+                drivers['safari'] = new SafariDriver()
+                break
                 
             default:
                 throw new RuntimeException("$browser Not supported...yet")
@@ -46,7 +51,8 @@ class DriveTest {
     }
     
     static executeAction(browser, baseUrl, command, target="", value="") {
-        Selenium selenium = new WebDriverBackedSelenium(getDriver(browser), baseUrl)
+        WebDriver driver = getDriver(browser)
+        Selenium selenium = new WebDriverBackedSelenium(driver, baseUrl)
         if(target.size() && value.size()) {
             highlightElement(driver, target)
             
@@ -70,7 +76,7 @@ class DriveTest {
             WebElement element = elementFinder.findElement(driver, target)
             String bgcolor = element.getCssValue("backgroundColor");
             (0..4).each {
-                js.executeScript("arguments[0].style.backgroundColor = '#FFFFCC'", element)
+                js.executeScript("arguments[0].style.backgroundColor = '#fff648'", element)
                 Thread.sleep(300)
                 js.executeScript("arguments[0].style.backgroundColor = '${bgcolor}'", element)
                 Thread.sleep(300)
@@ -94,8 +100,8 @@ class DriveTest {
             WebElement element = elementFinder.findElement(driver, target)
             String bgcolor = element.getCssValue("backgroundColor");
             
-            js.executeScript("arguments[0].style.backgroundColor = '#FFFFCC'", element)
-            Thread.sleep(300)
+            js.executeScript("arguments[0].style.backgroundColor = '#fff648'", element)
+            Thread.sleep(800)
             js.executeScript("arguments[0].style.backgroundColor = '${bgcolor}'", element)
         } catch(e) {
             println ">>>>> Ignoring $e.message"
@@ -103,7 +109,16 @@ class DriveTest {
     }
     
     static void dispose() {
-        driver?.close()
+        drivers.each { String name, WebDriver driver ->
+            println "Closing ${name}"
+            try {
+                driver.quit()
+            } catch(e) {
+                e.printStackTrace()
+            }
+            println "Done"
+        }
+        drivers.clear()
     }
     
     /*

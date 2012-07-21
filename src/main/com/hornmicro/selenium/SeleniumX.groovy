@@ -1,6 +1,7 @@
 package com.hornmicro.selenium
 
 import groovy.transform.CompileStatic
+import groovy.transform.TypeChecked
 
 import org.eclipse.core.databinding.observable.Realm
 import org.eclipse.jface.databinding.swt.SWTObservables
@@ -8,7 +9,7 @@ import org.eclipse.swt.widgets.Display
 
 import com.hornmicro.selenium.ui.MainController
 
-
+@CompileStatic
 class SeleniumX implements Runnable {
     Display display
     MainController controller

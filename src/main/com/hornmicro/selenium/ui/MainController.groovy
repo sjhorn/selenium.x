@@ -1,5 +1,7 @@
 package com.hornmicro.selenium.ui
 
+import groovy.transform.CompileStatic
+
 import java.beans.PropertyChangeListener
 
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -48,6 +50,7 @@ import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
 import com.hornmicro.selenium.model.TestSuiteModel
 
+
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
     Action openAction
     Action executeAction
@@ -58,7 +61,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     
     TestSuiteModel model = new TestSuiteModel()
     MainView view
-    def parent
+    Composite parent
     
     public MainController() {
         super(null)
@@ -75,17 +78,23 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         setExceptionHandler(this)
     }
     
+    @CompileStatic
     void run() {
         blockOnOpen = true
         open()
-        Display.default?.dispose()
+        Display.getDefault()?.dispose()
+
+        // Safari driver does not release threads so force exit :(
+        System.exit(0)
     }
     
+    @CompileStatic
     void widgetDisposed(DisposeEvent de) {
         DriveTest.dispose()
         Resources.dispose()
     }
     
+    @CompileStatic
     protected void configureShell(Shell shell) {
         super.configureShell(shell)
         shell.text = "selenium.x"
@@ -93,6 +102,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         shell.addDisposeListener(this)
     }
     
+    @CompileStatic
     protected Control createContents(Composite parent) {
         this.parent = parent
         parent.setLayout(new FillLayout())
@@ -101,14 +111,15 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
         wireView()
         
-        model.open(new File("/Users/shorn/dev/selenium.x/test/Test Suite"))
+        model.open(new File("test/Test Suite"))
         
         return view
     }
     
+    @CompileStatic
     class TestCaseProvider extends StyledCellLabelProvider {
         void update(ViewerCell cell) {
-            TestModel test = cell.element
+            TestModel test = (TestModel) cell.element
             def col = cell.columnIndex
             
             cell.text = 
@@ -121,43 +132,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         }
     }
     
-    static class ToolbarProperties extends WidgetValueProperty {
-        static selection() {
-            return new ToolbarProperties()
-        }
-        
-        private ToolbarProperties() {
-            super(SWT.Selection);
-        }
-    
-        boolean doGetBooleanValue(Object source) {
-            return ((ToolItem) source).getSelection();
-        }
-    
-        void doSetBooleanValue(Object source, boolean value) {
-            ((ToolItem) source).setSelection(value);
-        }
-    
-        String toString() {
-            return "Toolbar.selection <Boolean>"
-        }
-        
-        Object getValueType() {
-            return Boolean.TYPE;
-        }
-    
-        Object doGetValue(Object source) {
-            return doGetBooleanValue(source) ? Boolean.TRUE : Boolean.FALSE;
-        }
-    
-        void doSetValue(Object source, Object value) {
-            if (value == null)
-                value = Boolean.FALSE;
-            doSetBooleanValue(source, ((Boolean) value).booleanValue());
-        }
-    }
-    
-    
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
         
@@ -166,12 +140,15 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             new ComputedValue() {
                 Object calculate() {
                     def firefox = ToolbarProperties.selection().observe(view.firefox) 
-                    def chrome = ToolbarProperties.selection().observe(view.firefox)
+                    def chrome = ToolbarProperties.selection().observe(view.chrome)
+                    def safari = ToolbarProperties.selection().observe(view.safari)
                     
                     if(firefox.getValue()) {
                         return "firefox"
                     } else if(chrome.getValue()) {
                         return "chrome"
+                    } else if(safari.getValue()) {
+                        return "safari"
                     }
                     return "chrome"
                 }
@@ -299,6 +276,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         parent.layout()
     }
     
+    @CompileStatic
     protected MenuManager createMenuManager() {
         MenuManager menuManager = new MenuManager();
         MenuManager fileMenu = new MenuManager("File")
@@ -332,6 +310,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     }
     
     // Cleanup the groovy proxy noise in the exception
+    @CompileStatic
     public void handleException(Throwable e) {
         StackTraceUtils.deepSanitize(e)
         e.printStackTrace()
@@ -339,10 +318,3 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
 
 }
 
-class ObservableListFactory implements IObservableFactory {
-    public IObservable createObservable(Object target) {
-        WritableList list = WritableList.withElementType(String)
-        list.addAll((Collection) target?.baseURL)
-        return list
-    }
-}
