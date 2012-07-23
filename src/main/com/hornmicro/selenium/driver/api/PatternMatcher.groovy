@@ -29,8 +29,8 @@ class PatternMatcher {
         def strategyName = 'glob' // by default
         Matcher r
         if ( (r = (pattern =~ /^([a-z-]+):(.*)/)).matches() ) {
-            def possibleNewStrategyName = r[0][1]
-            def possibleNewPattern = r[0][2]
+            def possibleNewStrategyName = r.group(1)
+            def possibleNewPattern = r.group(2)
             if (PatternMatcher.strategies[possibleNewStrategyName]) {
                 strategyName = possibleNewStrategyName;
                 pattern = possibleNewPattern;

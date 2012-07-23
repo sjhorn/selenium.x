@@ -1,7 +1,10 @@
 package com.hornmicro.selenium.driver.api
 
 
+import java.lang.reflect.Method
 import java.util.regex.Matcher
+
+import org.codehaus.groovy.runtime.StackTraceUtils
 
 import com.thoughtworks.selenium.Selenium
 
@@ -11,9 +14,12 @@ import com.thoughtworks.selenium.Selenium
 // and javascript/selenium-core/scripts/selenium-executionloop.js
 // and ide/main/src/content/selenium-runner.js
 class CommandHandlerFactory {
-    static final List seleniumApi = Selenium.declaredMethods*.name
+    static final List ignoredMethods = [ 'start', 'stop', 'setExtensionJs',
+            'showContextualBanner', 'getLog', 'captureNetworkTraffic',
+            'addCustomRequestHeader']
+    static final List seleniumApi = Selenium.declaredMethods.findAll { !(it.name in ignoredMethods) }
     static Long DEFAULT_TIMEOUT = 30000
-    List<CommandHandler> handlers = []
+    Map<String, CommandHandler> handlers = [:]
     Map storedVars = [:]
     
     void registerAction(name, actionBlock, wait, dontCheckAlertsAndConfirms) {
@@ -37,13 +43,15 @@ class CommandHandlerFactory {
         // getFoo, assertFoo, verifyFoo, assertNotFoo, verifyNotFoo
         // storeFoo, waitForFoo, and waitForNotFoo.
         
-        for (def functionName : seleniumApi) {
+        for (Method method : seleniumApi ) {
+            String functionName = method.name
             Matcher match = ( functionName =~ /^(get|is)([A-Z].+)$/ ) 
             if (match.matches()) {
-                def accessMethod = seleniumApi[functionName]
+                println "Looking at $functionName"
+                def accessMethod = method
                 def accessBlock = new FunctionBind(accessMethod, selenium)  //fnBind(accessMethod, seleniumApi);
-                def baseName = match[0][2];
-                def isBoolean = (match[0][1] == "is");
+                def baseName = match.group(2)
+                def isBoolean = (match.group(1) == "is");
                 def requiresTarget =  accessBlock.__method.parameterTypes.size() == 1 //(accessMethod.length == 1)
                 
                 this.registerAccessor(functionName, accessBlock)
@@ -58,11 +66,12 @@ class CommandHandlerFactory {
     }
     
     void _registerAllActions(Selenium selenium) {
-        for (def functionName in seleniumApi) {
+        for (Method method : seleniumApi) {
+            String functionName = method.name
             Matcher match = (functionName =~ /^do([A-Z].+)$/)
             if (match.matches()) {
-                def actionName = lcfirst(match[0][1])
-                def actionMethod = seleniumApi[functionName]
+                def actionName = lcfirst(match.group(1))
+                def actionMethod = method
                 def dontCheckPopups = functionName in ['doWaitForPopup','getAlert','getConfirmation','doWaitForCondition','doWaitForPageLoad']
                 //actionMethod.dontCheckAlertsAndConfirms
                 def actionBlock = new FunctionBind(actionMethod, selenium)
@@ -73,17 +82,18 @@ class CommandHandlerFactory {
     }
     
     void _registerAllAsserts(Selenium selenium) {
-        for (def functionName in seleniumApi) {
+        for (Method method : seleniumApi) {
+            String functionName = method.name
             Matcher match = (functionName =~ /^assert([A-Z].+)$/)
             if (match.matches()) {
-                def assertBlock = new FunctionBind(seleniumApi[functionName], selenium)
+                def assertBlock = new FunctionBind(method, selenium)
 
                 // Register the assert with the "assert" prefix, and halt on failure.
                 def assertName = functionName
                 this.registerAssert(assertName, assertBlock, true)
 
                 // Register the assert with the "verify" prefix, and do not halt on failure.
-                def verifyName = "verify" + match[0][1]
+                def verifyName = "verify" + match.group(1)
                 this.registerAssert(verifyName, assertBlock, false)
             }
         }
@@ -265,6 +275,16 @@ class CommandHandlerFactory {
         if(action == null) return null
         if(action.size() == 0) return action
         return action[0].toUpperCase() + action.substring(1)
+    }
+    
+    static main(args) {
+        try {
+            def chf = new CommandHandlerFactory().registerAll(null)
+            println "All good" 
+        } catch(e) {
+            StackTraceUtils.sanitize(e)
+            e.printStackTrace()
+        }
     }
 }
 

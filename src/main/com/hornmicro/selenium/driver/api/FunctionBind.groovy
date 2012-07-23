@@ -5,13 +5,12 @@ import java.lang.reflect.Method;
 import com.thoughtworks.selenium.Selenium;
 
 class FunctionBind  {
-    static Method[] methods = Selenium.getDeclaredMethods()
     Method __method
     Selenium selenium
     
-    FunctionBind(String methodName, Selenium selenium) {
+    FunctionBind(Method method, Selenium selenium) {
         this.selenium = selenium
-        this.__method = methods.find { it.name == methodName}
+        this.__method = method
     }
     
     void call(Object... args) {
