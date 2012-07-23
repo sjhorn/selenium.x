@@ -5,6 +5,11 @@ import java.util.regex.Matcher
 
 import com.thoughtworks.selenium.Selenium
 
+// Based on javascript/selenium-core/scripts/selenium-commandhandlers.js
+// and javascript/selenium-core/scripts/htmlutils.js
+// and javascript/selenium-core/scripts/selenium-api.js
+// and javascript/selenium-core/scripts/selenium-executionloop.js
+// and ide/main/src/content/selenium-runner.js
 class CommandHandlerFactory {
     static final List seleniumApi = Selenium.declaredMethods*.name
     static Long DEFAULT_TIMEOUT = 30000
@@ -67,8 +72,28 @@ class CommandHandlerFactory {
         }
     }
     
-    
-    
+    void _registerAllAsserts(Selenium selenium) {
+        for (def functionName in seleniumApi) {
+            Matcher match = (functionName =~ /^assert([A-Z].+)$/)
+            if (match.matches()) {
+                def assertBlock = new FunctionBind(seleniumApi[functionName], selenium)
+
+                // Register the assert with the "assert" prefix, and halt on failure.
+                def assertName = functionName
+                this.registerAssert(assertName, assertBlock, true)
+
+                // Register the assert with the "verify" prefix, and do not halt on failure.
+                def verifyName = "verify" + match[0][1]
+                this.registerAssert(verifyName, assertBlock, false)
+            }
+        }
+    }
+
+    void registerAll(Selenium selenium) {
+        this._registerAllAccessors(selenium)
+        this._registerAllActions(selenium)
+        this._registerAllAsserts(selenium)
+    }
     
     def _waitForActionForPredicate(predicateBlock) {
         // Convert an isBlahBlah(target, value) function into a waitForBlahBlah(target, value) function.
