@@ -54,15 +54,15 @@ class SeleneseAPI {
 }
 
 class CommandDefinition {
-    enum type { DIRECT, VERIFY, WAITFOR, NOT, ANDWAIT }  
+    enum Type { DIRECT, VERIFY, WAITFOR, NOT, ANDWAIT }  
     String name
     String returnType
     String returnComment
     Map<String, Param> params = [:]
     String comment
     
-    Closure invoker
     Method method
+    List<Type> types = []
     
     def direct(Selenium sel, String target = null, String value = null) {
         switch(params.size()) {
@@ -72,9 +72,18 @@ class CommandDefinition {
         }
     }
     
-    def verify(Selenium sel, String target = null, String value = null) {
-        def res = direct(sel, target, value)
-        //if(res == )
+    Boolean verify(Selenium sel, String target = null, String value = null) {
+        return direct(sel, target, value) ? true : false
+    }
+    
+    Boolean waitFor(Selenium sel, String target = null, String value = null) {
+        
+        return true 
+    }
+    
+    
+    def callMethod(Selenium sel, target=null, value=null) {
+        
     }
 }
 

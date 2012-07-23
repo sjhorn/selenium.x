@@ -52,7 +52,12 @@ class ParseAPI {
         commands.push("echo")
         commands.push("break")
         
-        commands.sort().each { println it }
+        commands.sort().each {
+            if(it.startsWith("waitFor")) 
+                println it 
+        }
+        
+        
         /*
          _loadSeleniumCommands: function() {
             var commands = [];
