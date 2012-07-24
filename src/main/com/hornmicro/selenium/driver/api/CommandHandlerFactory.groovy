@@ -5,6 +5,10 @@ import java.lang.reflect.Method
 import java.util.regex.Matcher
 
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebDriverBackedSelenium
+import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.remote.DesiredCapabilities
 
 import com.thoughtworks.selenium.Selenium
 
@@ -14,9 +18,31 @@ import com.thoughtworks.selenium.Selenium
 // and javascript/selenium-core/scripts/selenium-executionloop.js
 // and ide/main/src/content/selenium-runner.js
 class CommandHandlerFactory {
-    static final List ignoredMethods = [ 'start', 'stop', 'setExtensionJs',
-            'showContextualBanner', 'getLog', 'captureNetworkTraffic',
-            'addCustomRequestHeader']
+    static final List ignoredMethods = [ 
+        'start', 'stop', 'setExtensionJs',
+        'showContextualBanner', 'getLog', 'captureNetworkTraffic',
+        'addCustomRequestHeader'
+    ]
+    
+    static final List actionMethods = [
+        'addLocationStrategy','addScript','addSelection','allowNativeXpath','altKeyDown','altKeyUp',
+        'answerOnNextPrompt','assignId','captureEntirePageScreenshot','check','chooseCancelOnNextConfirmation',
+        'chooseOkOnNextConfirmation','click','clickAt','close','contextMenu',
+        'contextMenuAt','controlKeyDown','controlKeyUp','createCookie','deleteAllVisibleCookies',
+        'deleteCookie','deselectPopUp','doubleClick','doubleClickAt','dragAndDrop',
+        'dragAndDropToObject','dragdrop','fireEvent','focus','goBack',
+        'highlight','ignoreAttributesWithoutValue','keyDown','keyPress','keyUp',
+        'metaKeyDown','metaKeyUp','mouseDown','mouseDownAt','mouseDownRight',
+        'mouseDownRightAt','mouseMove','mouseMoveAt','mouseOut','mouseOver',
+        'mouseUp','mouseUpAt','mouseUpRight','mouseUpRightAt', 'open',
+        'openWindow','refresh','removeAllSelections','removeScript','removeSelection',
+        'rollup','runScript','select','selectFrame','selectPopUp',
+        'selectWindow','setBrowserLogLevel','setCursorPosition','setMouseSpeed','setSpeed',
+        'setTimeout','shiftKeyDown','shiftKeyUp','submit','type',
+        'typeKeys','uncheck','useXpathLibrary','waitForCondition','waitForFrameToLoad',
+        'waitForPageToLoad','waitForPopUp','windowFocus','windowMaximize'
+    ]
+    
     static final List seleniumApi = Selenium.declaredMethods.findAll { !(it.name in ignoredMethods) }
     static Long DEFAULT_TIMEOUT = 30000
     Map<String, CommandHandler> handlers = [:]
@@ -47,7 +73,7 @@ class CommandHandlerFactory {
             String functionName = method.name
             Matcher match = ( functionName =~ /^(get|is)([A-Z].+)$/ ) 
             if (match.matches()) {
-                println "Looking at $functionName"
+                //println "Looking at Accessor $functionName"
                 def accessMethod = method
                 def accessBlock = new FunctionBind(accessMethod, selenium)  //fnBind(accessMethod, seleniumApi);
                 def baseName = match.group(2)
@@ -55,11 +81,11 @@ class CommandHandlerFactory {
                 def requiresTarget =  accessBlock.__method.parameterTypes.size() == 1 //(accessMethod.length == 1)
                 
                 this.registerAccessor(functionName, accessBlock)
-                this._registerStoreCommandForAccessor(baseName, accessBlock, requiresTarget);
+                this._registerStoreCommandForAccessor(baseName, accessBlock, requiresTarget)
 
-                def predicateBlock = this._predicateForAccessor(accessBlock, requiresTarget, isBoolean);
-                this._registerAssertionsForPredicate(baseName, predicateBlock);
-                this._registerWaitForCommandsForPredicate(seleniumApi, baseName, predicateBlock);
+                def predicateBlock = this._predicateForAccessor(accessBlock, requiresTarget, isBoolean)
+                this._registerAssertionsForPredicate(baseName, predicateBlock)
+                this._registerWaitForCommandsForPredicate(selenium, baseName, predicateBlock)
                 
             }
         }
@@ -68,9 +94,12 @@ class CommandHandlerFactory {
     void _registerAllActions(Selenium selenium) {
         for (Method method : seleniumApi) {
             String functionName = method.name
-            Matcher match = (functionName =~ /^do([A-Z].+)$/)
-            if (match.matches()) {
-                def actionName = lcfirst(match.group(1))
+            //Matcher match = (functionName =~ /^do([A-Z].+)$/)
+            if (functionName in actionMethods /*match.matches()*/) {
+                if(functionName == 'open' && method.parameterTypes.size() != 1)
+                    continue // ignore the 2 arg open.
+                
+                def actionName = functionName //lcfirst(match.group(1))
                 def actionMethod = method
                 def dontCheckPopups = functionName in ['doWaitForPopup','getAlert','getConfirmation','doWaitForCondition','doWaitForPageLoad']
                 //actionMethod.dontCheckAlertsAndConfirms
@@ -78,9 +107,11 @@ class CommandHandlerFactory {
                 this.registerAction(actionName, actionBlock, false, dontCheckPopups)
                 this.registerAction(actionName + "AndWait", actionBlock, true, dontCheckPopups)
             }
+            
         }
     }
     
+    // This does not match anything at the moment.
     void _registerAllAsserts(Selenium selenium) {
         for (Method method : seleniumApi) {
             String functionName = method.name
@@ -131,14 +162,14 @@ class CommandHandlerFactory {
         }
     }
     
-    def _registerWaitForCommandsForPredicate(seleniumApi, baseName, predicateBlock) {
+    def _registerWaitForCommandsForPredicate(Selenium selenium, String baseName, predicateBlock) {
         // Register a waitForBlahBlah and waitForNotBlahBlah based on the specified accessor.
-        def waitForActionMethod = this._waitForActionForPredicate(predicateBlock);
-        def waitForActionBlock = new FunctionBind(waitForActionMethod, seleniumApi);
+        def waitForActionMethod = this._waitForActionForPredicate(predicateBlock)
+        def waitForActionBlock = waitForActionMethod //new FunctionBind(waitForActionMethod, selenium)
         
         def invertedPredicateBlock = this._invertPredicate(predicateBlock);
         def waitForNotActionMethod = this._waitForActionForPredicate(invertedPredicateBlock);
-        def waitForNotActionBlock = new FunctionBind(waitForNotActionMethod, seleniumApi);
+        def waitForNotActionBlock = waitForNotActionMethod //new FunctionBind(waitForNotActionMethod, selenium);
         
         this.registerAction("waitFor" + baseName, waitForActionBlock, false, true);
         this.registerAction("waitFor" + this._invertPredicateName(baseName), waitForNotActionBlock, false, true);
@@ -270,20 +301,48 @@ class CommandHandlerFactory {
         selString = selString.replaceAll(/([,\\])/, '\\$1');
         return new String(a);
     }
-    
+    /*
     private String lcfirst(String action) {
         if(action == null) return null
         if(action.size() == 0) return action
         return action[0].toUpperCase() + action.substring(1)
     }
+    */
     
     static main(args) {
+        WebDriver driver
         try {
-            def chf = new CommandHandlerFactory().registerAll(null)
-            println "All good" 
+            System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
+            DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+            capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
+            
+            driver = new ChromeDriver(capabilities)
+            Selenium selenium = new WebDriverBackedSelenium(driver, "http://www.wotif.com/")
+            def chf = new CommandHandlerFactory()
+            chf.registerAll(selenium)
+            
+            [
+                ['open','/hotel/View?hotel=W4937'],
+                ['verifyTextPresent','Add property to shortlist'],
+                ['click',"//span[@id='shortlist-top']/a/span[2]"],
+                ['waitForTextPresent','Remove property from shortlist'],
+                ['verifyTextPresent','Remove property from shortlist'],
+                ['click',"//span[@id='shortlist-top']/a/span[2]"],
+                ['waitForTextPresent','Add property to shortlist'],
+                ['verifyTextPresent','Add property to shortlist']
+            ].each {
+                SeleniumCommand command = new SeleniumCommand(it[0])
+                CommandHandler handler = chf.getCommandHandler(command.command)
+                command.target = it[1]
+                println "Running ${command} -> $handler"
+                println "Command Result: "+ handler.execute(selenium, command).terminationCondition
+            }            
+            
         } catch(e) {
             StackTraceUtils.sanitize(e)
             e.printStackTrace()
+        } finally {
+            driver.quit()   
         }
     }
 }

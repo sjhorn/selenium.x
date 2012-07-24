@@ -1,6 +1,6 @@
 package com.hornmicro.selenium.driver.api
 
-class AssertResult {
+class AssertResult extends Result {
     Boolean passed = true
     Boolean failed = false
     String failureMessage = ""

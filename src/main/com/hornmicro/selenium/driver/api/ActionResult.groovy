@@ -1,7 +1,6 @@
 package com.hornmicro.selenium.driver.api
 
-class ActionResult {
-    def terminationCondition
+class ActionResult extends Result {
     
     ActionResult(terminationCondition) {
         this.terminationCondition = terminationCondition

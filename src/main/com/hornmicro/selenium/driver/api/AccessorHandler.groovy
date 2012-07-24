@@ -10,7 +10,7 @@ class AccessorHandler extends CommandHandler {
         this.accessBlock = accessBlock
     }
     
-    AccessorResult execute(Selenium seleniumApi,SeleniumCommand command) {
+    Result execute(Selenium selenium, SeleniumCommand command) {
         def returnValue = this.accessBlock(command.target, command.value)
         return new AccessorResult(returnValue)
     }

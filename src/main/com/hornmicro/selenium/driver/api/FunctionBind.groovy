@@ -1,10 +1,11 @@
 package com.hornmicro.selenium.driver.api
 
-import java.lang.reflect.Method;
 
-import com.thoughtworks.selenium.Selenium;
+import java.lang.reflect.Method
 
-class FunctionBind  {
+import com.thoughtworks.selenium.Selenium
+
+class FunctionBind {
     Method __method
     Selenium selenium
     
@@ -13,7 +14,7 @@ class FunctionBind  {
         this.__method = method
     }
     
-    void call(Object... args) {
-        __method.invoke(selenium, args)
+    def call(Object... args) {
+        return __method.invoke(selenium, args)
     }
 }

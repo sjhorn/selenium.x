@@ -1,7 +1,6 @@
 package com.hornmicro.selenium.driver.api
 
-class AccessorResult {
-    def terminationCondition
+class AccessorResult extends Result {
     def result
     
     AccessorResult(result) {
