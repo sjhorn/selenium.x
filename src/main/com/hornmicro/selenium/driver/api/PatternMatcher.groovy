@@ -106,6 +106,7 @@ class PatternMatcher {
      * "glob" (aka "wildmat") patterns, e.g. "glob:one,two,*"
      */
     void glob(globString) {
+        println regexpFromGlob(globString)
         Pattern regexp = Pattern.compile(regexpFromGlob(globString))
         this.matches = { actual ->
             return regexp.matcher(actual).matches()
@@ -136,7 +137,9 @@ class PatternMatcher {
             assert PatternMatcher.matches('regexpi:Nope', 'whatever') == false
             assert PatternMatcher.matches('regexp:WhatEver', 'whatever') == false
             assert PatternMatcher.matches('regexp:whatever', 'whatever') == true
-            println "All good!"
+            
+            assert PatternMatcher.matches('From*Brisbane Airport * 4009, Australia',"From\nBrisbane Airport (BNE), 1 Alpinia Dr, Brisbane Airport QLD 4009, Australia") == true
+            println "All good!" 
         } catch(e) {
             StackTraceUtils.sanitize(e)
             e.printStackTrace()

@@ -9,9 +9,10 @@ import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebDriverBackedSelenium
 import org.openqa.selenium.WebElement
+import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
-import org.openqa.selenium.safari.SafariDriver
+import org.openqa.selenium.remote.DesiredCapabilities
 
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
@@ -139,6 +140,10 @@ class CommandHandlerFactory {
         this._registerAllAccessors(selenium)
         this._registerAllActions(selenium)
         this._registerAllAsserts(selenium)
+        
+        registerAction("pause", {String target, value=null ->
+            Thread.sleep(target as Long)
+        }, false, true)
     }
     
     def _waitForActionForPredicate(predicateBlock) {
@@ -353,11 +358,11 @@ class CommandHandlerFactory {
     static main(args) {
         WebDriver driver
         try {
-            //System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
-            //DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-            //capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
+            System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
+            DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+            capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
             
-            driver = new SafariDriver() //new ChromeDriver(capabilities)
+            driver = new ChromeDriver(capabilities) /*new SafariDriver()*/ 
             Selenium selenium = new WebDriverBackedSelenium(driver, "http://www.wotif.com/")
             def chf = new CommandHandlerFactory()
             chf.registerAll(selenium)
