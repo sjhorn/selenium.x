@@ -22,10 +22,10 @@ class AssertHandler extends CommandHandler {
         def result = new AssertResult()
         def callable = this.assertBlock ?: this.closure
         try {
+            println "Calling action $command"
             if(command.target && command.value) {
                 callable.call(command.target, command.value)
             } else if (command.target) {
-                println "Calling with '$command.target'"
                 callable.call(command.target)
             } else {
                 callable.call()

@@ -5,11 +5,17 @@ import java.lang.reflect.Method
 import java.util.regex.Matcher
 
 import org.codehaus.groovy.runtime.StackTraceUtils
+import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebDriverBackedSelenium
+import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.internal.seleniumemulation.ElementFinder
+import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
 import org.openqa.selenium.remote.DesiredCapabilities
 
+import com.hornmicro.selenium.model.TestCaseModel
+import com.hornmicro.selenium.model.TestModel
 import com.thoughtworks.selenium.Selenium
 
 // Based on javascript/selenium-core/scripts/selenium-commandhandlers.js
@@ -138,11 +144,17 @@ class CommandHandlerFactory {
     
     def _waitForActionForPredicate(predicateBlock) {
         // Convert an isBlahBlah(target, value) function into a waitForBlahBlah(target, value) function.
-        return { target, value ->
+        return { target, value=null ->
             
             def terminationCondition = { ->
                 try {
-                    return predicateBlock(target, value).isTrue
+                    if(value) {
+                        return predicateBlock(target, value).isTrue
+                    } else if (target) {
+                        return predicateBlock(target).isTrue
+                    } else {
+                        return predicateBlock().isTrue
+                    }
                 } catch (e) {
                     // Treat exceptions as meaning the condition is not yet met.
                     // Useful, for example, for waitForValue when the element has
@@ -193,8 +205,14 @@ class CommandHandlerFactory {
     
     def createAssertionFromPredicate(predicateBlock) {
         // Convert an isBlahBlah(target, value) function into an assertBlahBlah(target, value) function.
-        return { target, value ->
-            PredicateResult result = predicateBlock(target, value);
+        return { target, value=null ->
+            PredicateResult result
+            if(value != null) {
+                result = predicateBlock(target, value)
+            } else {
+                result = predicateBlock(target)
+            }
+                
             if (!result.isTrue) {
                 throw new AssertionFailedError(result.message) //Assert.fail(result.message);
             }
@@ -309,6 +327,23 @@ class CommandHandlerFactory {
     }
     */
     
+    static void highlightElement(WebDriver driver, String target) {
+        try {
+            JavascriptExecutor js = ((JavascriptExecutor) driver)
+            JavascriptLibrary javascriptLibrary = new JavascriptLibrary()
+            ElementFinder elementFinder = new ElementFinder(javascriptLibrary)
+            
+            WebElement element = elementFinder.findElement(driver, target)
+            String bgcolor = element.getCssValue("backgroundColor");
+            
+            js.executeScript("arguments[0].style.backgroundColor = '#fff648'", element)
+            Thread.sleep(800)
+            js.executeScript("arguments[0].style.backgroundColor = '${bgcolor}'", element)
+        } catch(e) {
+            //println ">>>>> Ignoring $e.message"
+        }
+    }
+     
     static main(args) {
         WebDriver driver
         try {
@@ -321,21 +356,55 @@ class CommandHandlerFactory {
             def chf = new CommandHandlerFactory()
             chf.registerAll(selenium)
             
-            [
-                ['open','/hotel/View?hotel=W4937'],
-                ['verifyTextPresent','Add property to shortlist'],
-                ['click',"//span[@id='shortlist-top']/a/span[2]"],
-                ['waitForTextPresent','Remove property from shortlist'],
-                ['verifyTextPresent','Remove property from shortlist'],
-                ['click',"//span[@id='shortlist-top']/a/span[2]"],
-                ['waitForTextPresent','Add property to shortlist'],
-                ['verifyTextPresent','Add property to shortlist']
-            ].each {
-                SeleniumCommand command = new SeleniumCommand(it[0])
+            TestCaseModel testCase = TestCaseModel.load(new File("test/Seven days links.html"))
+            
+            for( TestModel test : testCase.tests) {
+                SeleniumCommand command = new SeleniumCommand(test.command)
                 CommandHandler handler = chf.getCommandHandler(command.command)
-                command.target = it[1]
-                println "Running ${command} -> $handler"
-                println "Command Result: "+ handler.execute(selenium, command).terminationCondition
+                command.target = test.target
+                command.value = test.value
+                println "Running ${command}"
+                if(test.target)
+                    highlightElement(driver, test.target)
+                def res = handler.execute(selenium, command)
+                
+                if(res instanceof AssertResult) {
+                    if(res.passed) {
+                        println res.passed 
+                    } else {
+                        System.err.println("Failed [$res.failureMessage]")
+                        break
+                    } 
+                } else if(res instanceof AccessorResult) {
+                    if(res?.terminationCondition) {
+                        println "Term condition AccessorResult" 
+                    } else {
+                        println "Accessor Result ${res.result}"
+                    }
+                } else { // ActionResult
+                    if(res?.terminationCondition) {
+                        println "Term condition ActionResult"
+                        if(res.terminationCondition instanceof Closure) {
+                            try {
+                                def r 
+                                while(!(r = res.terminationCondition())) {
+                                    Thread.sleep(20)
+                                }
+                                println "Success"
+                            } catch(e) {
+                                System.err.println "Failed ${e.message}"
+                                break
+                            }
+                        } else {
+                            println "Action result ${res.terminationCondition}"
+                        }
+                    } else {
+                        println "Done"
+                    }
+                }
+                println ("_"*40)+"\n\n"
+                
+                Thread.sleep(1000) 
             }            
             
         } catch(e) {

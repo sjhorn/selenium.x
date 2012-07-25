@@ -15,6 +15,7 @@ class FunctionBind {
     }
     
     def call(Object... args) {
+        println "Calling ${__method.name} with ${args}"
         return __method.invoke(selenium, args)
     }
 }

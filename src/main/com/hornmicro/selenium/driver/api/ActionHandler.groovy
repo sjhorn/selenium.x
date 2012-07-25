@@ -41,7 +41,7 @@ class ActionHandler extends CommandHandler {
         //    seleniumApi.ensureNoUnhandledPopups();
         //}
         def callable = this.actionBlock ?: this.closure
-        
+        println "Executing ${command} on ${callable.getClass()}"
         def handlerCondition
         if(command.target && command.value) {
             handlerCondition = callable.call(command.target, command.value)
@@ -59,21 +59,15 @@ class ActionHandler extends CommandHandler {
         return new ActionResult(terminationCondition);
     }
     
-    def makePageLoadCondition(Selenium selenium) {
-        Long timeoutTime = new Date().getTime() + CommandHandlerFactory.DEFAULT_TIMEOUT
+    Closure makePageLoadCondition(Selenium selenium) {
         return { ->
-            if (new Date().getTime() > timeoutTime) {
-                //if (callback != null) {
-                //     callback();
-                //}
+            try {
+                println "Waiting for ${CommandHandlerFactory.DEFAULT_TIMEOUT}ms"
+                selenium.waitForPageToLoad(CommandHandlerFactory.DEFAULT_TIMEOUT as String)
+            } catch(e) {
                 throw new SeleniumError("Timed out after " + CommandHandlerFactory.DEFAULT_TIMEOUT + "ms")
             }
-            try {
-                selenium.waitForPageToLoad(1) // cheap a nasty polling with 1ms timeout
-                return true
-            } catch(e) {
-                return false
-            }
+            return true
         }
     }
 
