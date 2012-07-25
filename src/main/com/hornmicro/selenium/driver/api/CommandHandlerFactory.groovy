@@ -9,10 +9,9 @@ import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebDriverBackedSelenium
 import org.openqa.selenium.WebElement
-import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
-import org.openqa.selenium.remote.DesiredCapabilities
+import org.openqa.selenium.safari.SafariDriver
 
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
@@ -223,8 +222,15 @@ class CommandHandlerFactory {
         // Given a predicate, return the negation of that predicate.
         // Leaves the message unchanged.
         // Used to create assertNot, verifyNot, and waitForNot commands.
-        return { target, value ->
-            PredicateResult result = predicateBlock(target, value);
+        return { target, value=null ->
+            PredicateResult result
+            if(result) {
+                result = predicateBlock(target, value)
+            } else if (target) {
+                result = predicateBlock(target)
+            } else {
+                result = predicateBlock()
+            }
             result.isTrue = !result.isTrue
             return result
         }
@@ -347,16 +353,16 @@ class CommandHandlerFactory {
     static main(args) {
         WebDriver driver
         try {
-            System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
-            DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-            capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
+            //System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
+            //DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+            //capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
             
-            driver = new ChromeDriver(capabilities)
+            driver = new SafariDriver() //new ChromeDriver(capabilities)
             Selenium selenium = new WebDriverBackedSelenium(driver, "http://www.wotif.com/")
             def chf = new CommandHandlerFactory()
             chf.registerAll(selenium)
             
-            TestCaseModel testCase = TestCaseModel.load(new File("test/Seven days links.html"))
+            TestCaseModel testCase = TestCaseModel.load(new File("test/Map.html"))
             
             for( TestModel test : testCase.tests) {
                 SeleniumCommand command = new SeleniumCommand(test.command)
@@ -404,14 +410,16 @@ class CommandHandlerFactory {
                 }
                 println ("_"*40)+"\n\n"
                 
-                Thread.sleep(1000) 
+                //Thread.sleep(20) 
+                
             }            
             
         } catch(e) {
             StackTraceUtils.sanitize(e)
             e.printStackTrace()
         } finally {
-            driver.quit()   
+            driver.quit()
+            System.exit(0) // Safari hang
         }
     }
 }
