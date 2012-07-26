@@ -25,7 +25,7 @@ class PlayCurrent extends Action {
         TestSuiteModel model = controller.model
         TestCaseModel testCase = model.selectedTestCase
         if(testCase && !running) {
-            running = true
+            //running = true
             nextTest(testCase, true)
         }
     }

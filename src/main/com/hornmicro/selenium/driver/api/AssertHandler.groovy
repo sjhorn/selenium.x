@@ -20,12 +20,9 @@ class AssertHandler extends CommandHandler {
     
     AssertResult execute(Selenium selenium, SeleniumCommand command) {
         def result = new AssertResult()
-        if(this.assertBlock) {
-            this.assertBlock.selenium = selenium
-        }
         def callable = this.assertBlock ?: this.closure
         try {
-            println "Calling action $command"
+            println "Calling assert $command"
             if(command.target && command.value) {
                 callable.call(command.target, command.value)
             } else if (command.target) {

@@ -23,7 +23,6 @@ class DriveTest {
     static Boolean highlight = true
     static Map<String, WebDriver> drivers = [:]
     static Map<WebDriver, SeleniumInstance> seleniums = [:]
-    static CommandHandlerFactory chf
     
     static void loadDriver(String browser) {
         switch(browser.toLowerCase()) {
@@ -56,23 +55,27 @@ class DriveTest {
         return drivers[browser]
     }
     
-    static Selenium getSelenium(WebDriver driver, String baseUrl) {
+    static SeleniumInstance getSeleniumInstance(String baseUrl, WebDriver driver) {
         if(!seleniums.containsKey(driver)) {
-            seleniums[driver] = new SeleniumInstance(new WebDriverBackedSelenium(driver, baseUrl), baseUrl)
+            println "Making first instance"
+            seleniums[driver] = new SeleniumInstance(baseUrl, driver)
         }
         SeleniumInstance si = seleniums[driver]
         
         // If the baseUrl changes 
+        println "Comparing $si.baseUrl with $baseUrl"
         if(si.baseUrl != baseUrl) {
-            seleniums[driver] = new SeleniumInstance(new WebDriverBackedSelenium(driver, baseUrl), baseUrl)
+            println "Making new instance "
+            seleniums[driver] = new SeleniumInstance(baseUrl, driver)
         }
-        return seleniums[driver].selenium
+        return seleniums[driver]
     }
     
     static executeAction(String browser, String baseUrl, TestModel test) {
         WebDriver driver = getDriver(browser)
-        Selenium selenium = getSelenium(driver, baseUrl)
-        chf = chf ?: new CommandHandlerFactory(selenium) 
+        SeleniumInstance si = getSeleniumInstance(baseUrl, driver)
+        Selenium selenium = si.selenium
+        CommandHandlerFactory chf = si.commandHandlerFactory  
         
         SeleniumCommand command = new SeleniumCommand(test.command)
         CommandHandler handler = chf.getCommandHandler(command.command)

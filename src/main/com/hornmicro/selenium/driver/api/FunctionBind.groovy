@@ -15,6 +15,7 @@ class FunctionBind {
     }
     
     def call(Object... args) {
+        println "${this.selenium}"
         if(__method.name=="deleteCookie") {
             args = [args[0], null] as Object[]
         }
