@@ -15,7 +15,6 @@ class FunctionBind {
     }
     
     def call(Object... args) {
-        println "Calling ${__method.name} with ${args}"
         if(__method.name=="deleteCookie") {
             args = [args[0], null] as Object[]
         }

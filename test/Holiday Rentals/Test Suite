@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="Home page.html">Home page</a></td></tr>
+<tr><td><a href="Navigate to Search Results.html">Navigate to Search Results</a></td></tr>
+<tr><td><a href="Images on multiple regions.html">Images on multiple regions</a></td></tr>
+<tr><td><a href="Breadcrumbs.html">Breadcrumbs</a></td></tr>
+<tr><td><a href="Calendar.html">Calendar</a></td></tr>
+<tr><td><a href="Details Map.html">Details Map</a></td></tr>
+<tr><td><a href="Images.html">Images</a></td></tr>
+<tr><td><a href="Guest Validation.html">Guest Validation</a></td></tr>
+<tr><td><a href="Text on Details page.html">Text on Details page</a></td></tr>
+<tr><td><a href="Modal on Details.html">Modal on Details</a></td></tr>
+<tr><td><a href="Text on Booking page.html">Text on Booking page</a></td></tr>
+<tr><td><a href="Modal on Booking.html">Modal on Booking</a></td></tr>
+<tr><td><a href="Booking.html">Booking</a></td></tr>
+<tr><td><a href="Booking with AMEX.html">Booking with AMEX</a></td></tr>
+<tr><td><a href="Confirmation page with nullhrs.html">Confirmation page with nullhrs</a></td></tr>
+<tr><td><a href="Pages don't contain Null.html">Pages don't contain Null</a></td></tr>
+</tbody></table>
+</body>
+</html>

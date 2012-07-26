@@ -106,7 +106,6 @@ class PatternMatcher {
      * "glob" (aka "wildmat") patterns, e.g. "glob:one,two,*"
      */
     void glob(globString) {
-        println regexpFromGlob(globString)
         Pattern regexp = Pattern.compile(regexpFromGlob(globString))
         this.matches = { actual ->
             return regexp.matcher(actual).matches()

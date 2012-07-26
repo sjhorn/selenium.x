@@ -9,10 +9,9 @@ import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebDriverBackedSelenium
 import org.openqa.selenium.WebElement
-import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
-import org.openqa.selenium.remote.DesiredCapabilities
 
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
@@ -50,9 +49,17 @@ class CommandHandlerFactory {
     ]
     
     static final List seleniumApi = Selenium.declaredMethods.findAll { !(it.name in ignoredMethods) }
-    static Long DEFAULT_TIMEOUT = 30000
+    static Long DEFAULT_TIMEOUT = 10000
     Map<String, CommandHandler> handlers = [:]
     Map storedVars = [:]
+    
+    CommandHandlerFactory() {
+        
+    }
+    
+    CommandHandlerFactory(Selenium selenium) {
+        registerAll(selenium)
+    }
     
     void registerAction(name, actionBlock, wait, dontCheckAlertsAndConfirms) {
         this.handlers[name] = new ActionHandler(actionBlock, wait, dontCheckAlertsAndConfirms)
@@ -354,20 +361,22 @@ class CommandHandlerFactory {
             //println ">>>>> Ignoring $e.message"
         }
     }
+    
+    
      
     static main(args) {
         WebDriver driver
         try {
-            System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
-            DesiredCapabilities capabilities = DesiredCapabilities.chrome();
-            capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
+            //System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
+            //DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+            //capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
             
-            driver = new ChromeDriver(capabilities) /*new SafariDriver()*/ 
+            driver = new FirefoxDriver() //new ChromeDriver(capabilities) /*new SafariDriver()*/ 
             Selenium selenium = new WebDriverBackedSelenium(driver, "http://www.wotif.com/")
             def chf = new CommandHandlerFactory()
             chf.registerAll(selenium)
             
-            TestCaseModel testCase = TestCaseModel.load(new File("test/Map.html"))
+            TestCaseModel testCase = TestCaseModel.load(new File("test/AAA Rating.html"))
             
             for( TestModel test : testCase.tests) {
                 SeleniumCommand command = new SeleniumCommand(test.command)

@@ -9,15 +9,21 @@ import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
 import org.openqa.selenium.remote.DesiredCapabilities
-import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.safari.SafariDriver
 
+import com.hornmicro.selenium.driver.api.AccessorResult
+import com.hornmicro.selenium.driver.api.AssertResult
+import com.hornmicro.selenium.driver.api.CommandHandler
+import com.hornmicro.selenium.driver.api.CommandHandlerFactory
+import com.hornmicro.selenium.driver.api.SeleniumCommand
+import com.hornmicro.selenium.model.TestModel
 import com.thoughtworks.selenium.Selenium
 
 class DriveTest {
-    static List methods = Selenium.declaredMethods*.name
     static Boolean highlight = true
-    static Map drivers = [:]
+    static Map<String, WebDriver> drivers = [:]
+    static Map<WebDriver, SeleniumInstance> seleniums = [:]
+    static CommandHandlerFactory chf
     
     static void loadDriver(String browser) {
         switch(browser.toLowerCase()) {
@@ -50,20 +56,69 @@ class DriveTest {
         return drivers[browser]
     }
     
-    static executeAction(browser, baseUrl, command, target="", value="") {
-        WebDriver driver = getDriver(browser)
-        Selenium selenium = new WebDriverBackedSelenium(driver, baseUrl)
-        if(target.size() && value.size()) {
-            highlightElement(driver, target)
-            
-            return selenium."$command"(target, value)
-        } else if(target.size()) {
-            highlightElement(driver, target)
-        
-            return selenium."$command"(target)
-        } else {
-            return selenium."$command"()
+    static Selenium getSelenium(WebDriver driver, String baseUrl) {
+        if(!seleniums.containsKey(driver)) {
+            seleniums[driver] = new SeleniumInstance(new WebDriverBackedSelenium(driver, baseUrl), baseUrl)
         }
+        SeleniumInstance si = seleniums[driver]
+        
+        // If the baseUrl changes 
+        if(si.baseUrl != baseUrl) {
+            seleniums[driver] = new SeleniumInstance(new WebDriverBackedSelenium(driver, baseUrl), baseUrl)
+        }
+        return seleniums[driver].selenium
+    }
+    
+    static executeAction(String browser, String baseUrl, TestModel test) {
+        WebDriver driver = getDriver(browser)
+        Selenium selenium = getSelenium(driver, baseUrl)
+        chf = chf ?: new CommandHandlerFactory(selenium) 
+        
+        SeleniumCommand command = new SeleniumCommand(test.command)
+        CommandHandler handler = chf.getCommandHandler(command.command)
+        command.target = test.target
+        command.value = test.value
+        println "Running ${command}"
+        
+        if(test.target)
+            highlightElement(driver, test.target)
+        def res = handler.execute(selenium, command)
+        
+        if(res instanceof AssertResult) {
+            if(res.passed) {
+                println "Passed"
+            } else {
+                System.err.println("Failed [$res.failureMessage]")
+                throw new RuntimeException("Failed [$res.failureMessage]")
+            }
+        } else if(res instanceof AccessorResult) {
+            if(res?.terminationCondition) {
+                System.err.println "Term condition AccessorResult"
+            } else {
+                println "Accessor Result ${res.result}"
+            }
+        } else { // ActionResult
+            if(res?.terminationCondition) {
+                println "Term condition ActionResult"
+                if(res.terminationCondition instanceof Closure) {
+                    try {
+                        def r
+                        while(!(r = res.terminationCondition())) {
+                            Thread.sleep(100)
+                        }
+                        println "Success"
+                    } catch(e) {
+                        System.err.println "Failed ${e.message}"
+                        throw new RuntimeException("Failed [$res.failureMessage]")
+                    }
+                } else {
+                    println "Action result ${res.terminationCondition}"
+                }
+            } else {
+                println "Done"
+            }
+        }
+        println ("_"*40)+"\n\n"
     }
     
     static Boolean findElement(String browser, String baseURL, String target) {
@@ -120,46 +175,4 @@ class DriveTest {
         }
         drivers.clear()
     }
-    
-    /*
-    Closure assertClosure(method, truth=true) {
-        switch(method.parameterTypes.size()) {
-            case 0: return { -> assert method() == truth }
-            case 1: return { arg1 -> assert method(arg1) == truth }
-            case 2: return { arg1, arg2 -> assert method(arg1, arg2) == truth }
-            default:
-                throw new RuntimeException("I don't know this method -> ${method.name}")
-        }
-    }
-    
-    void waitForClosure(method, truth=true) {
-        
-    }
-    
-    void andWaitClosure(method) {
-        
-    }
-    
-    void getMethod(name) {
-        
-    }
-    
-    static main(args) {
-        //WebDriver driver = new FirefoxDriver();
-        try {
-            String baseUrl = "http://www.wotif.com/";
-            
-            //Selenium selenium = new WebDriverBackedSelenium(driver, baseUrl);
-            //selenium.open("hotel/View?hotel=W4937");
-            //assert selenium.isTextPresent("Cancellation policy: No Cancellations or Changes")
-            //selenium.click("link=Details");
-            //assert selenium.isVisible("cancelPolicy0")
-            
-            //println "PASSED WOOHOO !!!"
-        } finally {
-            //driver.quit()
-        }
-        
-    }
-    */
 }

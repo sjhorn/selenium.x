@@ -11,6 +11,7 @@ class AccessorHandler extends CommandHandler {
     }
     
     Result execute(Selenium selenium, SeleniumCommand command) {
+        this.accessBlock.selenium = selenium
         def returnValue = this.accessBlock(command.target, command.value)
         return new AccessorResult(returnValue)
     }

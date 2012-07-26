@@ -40,6 +40,9 @@ class ActionHandler extends CommandHandler {
             // todo: this conditional logic is ugly
         //    seleniumApi.ensureNoUnhandledPopups();
         //}
+        if(this.actionBlock) {
+            this.actionBlock.selenium = selenium
+        }
         def callable = this.actionBlock ?: this.closure
         println "Executing ${command} on ${callable.getClass()}"
         def handlerCondition

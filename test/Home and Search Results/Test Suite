@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="Short Listing Properties.html">Short Listing Properties</a></td></tr>
+<tr><td><a href="Adults children search options.html">Adults children search options</a></td></tr>
+<tr><td><a href="Advanced Facilities search.html">Advanced Facilities search</a></td></tr>
+<tr><td><a href="Advanced Search Accom Type.html">Advanced Search Accom Type</a></td></tr>
+<tr><td><a href="Advanced Search Room Type.html">Advanced Search Room Type</a></td></tr>
+<tr><td><a href="Advanced Search Star Rating.html">Advanced Search Star Rating</a></td></tr>
+<tr><td><a href="Advanced weekend search.html">Advanced weekend search</a></td></tr>
+<tr><td><a href="Footer links.html">Footer links</a></td></tr>
+<tr><td><a href="Free Text Search.html">Free Text Search</a></td></tr>
+<tr><td><a href="Just one night.html">Just one night</a></td></tr>
+<tr><td><a href="Map open close function.html">Map open close function</a></td></tr>
+<tr><td><a href="Mouseover Properties.html">Mouseover Properties</a></td></tr>
+<tr><td><a href="New country region search.html">New country region search</a></td></tr>
+<tr><td><a href="Next previous 7 days End.html">Next previous 7 days End</a></td></tr>
+<tr><td><a href="SEO links.html">SEO links</a></td></tr>
+<tr><td><a href="Wots Hot Card fees.html">Wots Hot Card fees</a></td></tr>
+<tr><td><a href="Wots Hot.html">Wots Hot</a></td></tr>
+</tbody></table>
+</body>
+</html>

@@ -4,12 +4,12 @@
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="selenium.base" href="http://www.wotif.com/" />
-<title>Property Details - Map</title>
+<title>NewCode - Map open close funtion</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">Property Details - Map</td></tr>
+<tr><td rowspan="1" colspan="3">NewCode - Map open close funtion</td></tr>
 </thead><tbody>
 <tr>
 	<td>open</td>
@@ -18,22 +18,17 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>css=li.location-checked &gt; label</td>
+	<td>//ul[@id='country']//label[contains(., 'Australia')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1000</td>
 	<td></td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>css=label[for=popular-country-AU]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>waitForElementPresent</td>
-	<td>id=region-11</td>
-	<td></td>
-</tr>
-<tr>
-	<td>click</td>
-	<td>css=label[for=region-11]</td>
+	<td>//ul[@id='region']//label[contains(., 'Brisbane')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -42,18 +37,23 @@
 	<td></td>
 </tr>
 <tr>
-	<td>clickAndWait</td>
-	<td>//a[contains(.,'Brisbane Marriott Hotel')]</td>
+	<td>click</td>
+	<td>id=map-button</td>
 	<td></td>
 </tr>
 <tr>
-	<td>verifyText</td>
-	<td>link=Book</td>
-	<td>Book</td>
+	<td>select</td>
+	<td>id=poiCategories</td>
+	<td>label=Attractions</td>
 </tr>
 <tr>
-	<td>verifyTextPresent</td>
-	<td>All major transport services are offered in Brisbane and the Marriott is a well-known hotel.</td>
+	<td>verifySelectedLabel</td>
+	<td>id=poiCategories</td>
+	<td>Attractions</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>css=div.map-close</td>
 	<td></td>
 </tr>
 </tbody></table>

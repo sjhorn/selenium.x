@@ -8,14 +8,11 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.PojoProperties
-import org.eclipse.core.databinding.observable.IObservable
-import org.eclipse.core.databinding.observable.list.WritableList
-import org.eclipse.core.databinding.observable.masterdetail.IObservableFactory
 import org.eclipse.core.databinding.observable.value.ComputedValue
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
+import org.eclipse.jface.action.Separator
 import org.eclipse.jface.databinding.swt.WidgetProperties
-import org.eclipse.jface.databinding.swt.WidgetValueProperty
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue
 import org.eclipse.jface.databinding.viewers.ViewerProperties
 import org.eclipse.jface.databinding.viewers.ViewerSupport
@@ -37,12 +34,12 @@ import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Control
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
-import org.eclipse.swt.widgets.ToolItem
 
 import com.hornmicro.selenium.actions.AddTestCaseAction
 import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.FindAction
 import com.hornmicro.selenium.actions.OpenAction
+import com.hornmicro.selenium.actions.PlayCurrent
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
 import com.hornmicro.selenium.driver.DriveTest
@@ -58,6 +55,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     Action reloadAction
     Action addTestCaseAction
     Action removeTestCaseAction
+    Action playCurrent
+    
     
     TestSuiteModel model = new TestSuiteModel()
     MainView view
@@ -73,6 +72,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         reloadAction = new ReloadAction(this)
         addTestCaseAction = new AddTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
+        
+        playCurrent = new PlayCurrent(this)
         
         addMenuBar()
         setExceptionHandler(this)
@@ -98,7 +99,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     protected void configureShell(Shell shell) {
         super.configureShell(shell)
         shell.text = "selenium.x"
-        shell.setSize(740, 700)
+        int displayWidth = Display.getDefault().getBounds().width
+        shell.setBounds(displayWidth - 740, 1, 740, 700)
         shell.addDisposeListener(this)
     }
     
@@ -111,7 +113,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
         wireView()
         
-        model.open(new File("test/Test Suite"))
+        model.open(new File("/Users/shorn/dev/functional-testing/anz/Property Details/Test Suite"))
         
         return view
     }
@@ -305,6 +307,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         editMenu.add(selectAllAction)
         */
         menuManager.add(actionsMenu)
+        actionsMenu.add(playCurrent)
+        actionsMenu.add(new Separator())
         actionsMenu.add(executeAction)
         return menuManager
     }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="reCAPTCHA.html">reCAPTCHA</a></td></tr>
+<tr><td><a href="Shortlist.html">Shortlist</a></td></tr>
+<tr><td><a href="AAA Rating.html">AAA Rating</a></td></tr>
+<tr><td><a href="Calendar.html">Calendar</a></td></tr>
+<tr><td><a href="Cancellation Policy.html">Cancellation Policy</a></td></tr>
+<tr><td><a href="Card Fees.html">Card Fees</a></td></tr>
+<tr><td><a href="Change All Days_Weekends.html">Change All Days_Weekends</a></td></tr>
+<tr><td><a href="Currency Converter.html">Currency Converter</a></td></tr>
+<tr><td><a href="Full rate link.html">Full rate link</a></td></tr>
+<tr><td><a href="Images.html">Images</a></td></tr>
+<tr><td><a href="Map.html">Map</a></td></tr>
+<tr><td><a href="Navigate from Home Page.html">Navigate from Home Page</a></td></tr>
+<tr><td><a href="No Rating.html">No Rating</a></td></tr>
+<tr><td><a href="Property unavailable.html">Property unavailable</a></td></tr>
+<tr><td><a href="Qualmark Rating.html">Qualmark Rating</a></td></tr>
+<tr><td><a href="Reviews.html">Reviews</a></td></tr>
+<tr><td><a href="Robots Text.html">Robots Text</a></td></tr>
+<tr><td><a href="Send to a friend link.html">Send to a friend link</a></td></tr>
+<tr><td><a href="Seven days links.html">Seven days links</a></td></tr>
+</tbody></table>
+</body>
+</html>

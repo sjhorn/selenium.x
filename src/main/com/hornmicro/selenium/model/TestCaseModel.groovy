@@ -1,6 +1,9 @@
 package com.hornmicro.selenium.model
 
 import groovy.beans.Bindable
+
+import java.util.regex.Matcher
+
 import org.ccil.cowan.tagsoup.Parser
 
 @Bindable
@@ -31,7 +34,8 @@ class TestCaseModel {
                     value: tr.td[2].text()
                 ))
             } else {
-                testCase.name = tr.td[0].text()
+                Matcher fileName = (file.name =~ /([^\.]+).*/)
+                testCase.name = fileName.matches() ? fileName.group(1) : file.name    //tr.td[0].text()
             }
         }
         

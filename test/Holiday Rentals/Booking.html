@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://www.wotif.com/" />
+<title>Full end to end booking for HR</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">Full end to end booking for HR</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/holiday-rentals/new-zealand/south-island/alpen-view-luxury-villa-holiday-house?property_id=246116</td>
+	<td></td>
+</tr>
+<tr>
+	<td>focus</td>
+	<td>id=number-of-adults</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=number-of-adults</td>
+	<td>label=2</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@id='dp-arrival']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[@id='ui-datepicker-div']/table[2]/tbody/tr[2]/td/b</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=28</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@id='dp-departure']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//div[@id='ui-datepicker-div']/table[2]/tbody/tr[2]/td/b</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>500</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Book it</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=propertyTerms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=bondTerms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=paymentTerms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=eta</td>
+	<td>label=11:00</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=firstname</td>
+	<td>Joe</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=lastname</td>
+	<td>Bloggs</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=phone</td>
+	<td>165484351</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=email</td>
+	<td>jbloggs@gmail.com</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=reEnteredEmail</td>
+	<td>jbloggs@gmail.com</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=cc_name</td>
+	<td>Joe Bloggs</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=cc_number</td>
+	<td>4111 1111 1111 1111</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=cc_expiryMonth</td>
+	<td>label=Feb</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=cc_expiryYear</td>
+	<td>label=2014</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=cc_ccv</td>
+	<td>456</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=startProcess</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>7000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Booking successful</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>
