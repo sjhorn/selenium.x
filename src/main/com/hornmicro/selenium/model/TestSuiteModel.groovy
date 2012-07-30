@@ -11,7 +11,8 @@ class TestSuiteModel {
     String name = "Test Suite"
     ObservableList testCases = new ObservableList([ new TestCaseModel() ])
     TestCaseModel selectedTestCase = testCases[0]
-    
+    Integer runs = 0
+    Integer failures = 0
     
     Status open(File file) {
         if(file.exists()) {

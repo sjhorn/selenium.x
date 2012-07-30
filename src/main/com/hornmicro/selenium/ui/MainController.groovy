@@ -181,6 +181,16 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             BeanProperties.values(["name"] as String[]) // labels
         )
         
+        dbc.bindValue(
+            WidgetProperties.text().observe(view.runs),
+            BeanProperties.value("runs").observe(model)
+        )
+        
+        dbc.bindValue(
+            WidgetProperties.text().observe(view.failures),
+            BeanProperties.value("failures").observe(model)
+        )
+        
         // Observe test case selection
         IViewerObservableValue testCaseSelection = ViewerProperties.singleSelection().observe(view.testCasesViewer)
         
@@ -273,6 +283,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                 }
             }
         }] as PropertyChangeListener)
+        
+        
         
     }
     

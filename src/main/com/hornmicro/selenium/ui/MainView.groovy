@@ -9,6 +9,7 @@ import org.eclipse.swt.browser.Browser
 import org.eclipse.swt.custom.SashForm
 import org.eclipse.swt.events.ControlAdapter
 import org.eclipse.swt.events.ControlEvent
+import org.eclipse.swt.graphics.RGB
 import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.widgets.Combo
 import org.eclipse.swt.widgets.Composite
@@ -27,6 +28,9 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 @CompileStatic
 class MainView extends Composite {
+    private Label greenBar
+    private Label failures
+    private Label runs
     ToolItem playCurrent
     ToolItem firefox
     ToolItem chrome
@@ -241,21 +245,21 @@ class MainView extends Composite {
         refreshTestCases = tl.label(tip: "Refresh Test Cases", image:"gfx/button_refresh.png")
         */
         
-        def bar = new Label(testCasesHolder, SWT.NONE)
-        bar.layoutData = "span 2, growx, wrap, gap 0 0 5 5"
-        bar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
+        greenBar = new Label(testCasesHolder, SWT.NONE)
+        greenBar.layoutData = "span 2, growx, wrap, gap 0 0 5 5"
+        greenBar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
         
         new Label(testCasesHolder, SWT.NONE).text = "Runs:"
-        Label runs = new Label(testCasesHolder, SWT.NONE)
+        runs = new Label(testCasesHolder, SWT.NONE)
         runs.layoutData = "wrap"
-        runs.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GREEN))
+        runs.setForeground(Resources.getColor(0x4A, 0x88, 0x00))
         runs.text = "0"
         
         new Label(testCasesHolder, SWT.NONE).text = "Failures:"
-        Label failures = new Label(testCasesHolder, SWT.NONE)
+        failures = new Label(testCasesHolder, SWT.NONE)
         failures.layoutData = "wrap,gap 0 0 5 5"
         failures.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED))
-        failures.text = 0
+        failures.text = "0"
         
         //
         // Test Case

@@ -3,11 +3,12 @@ package com.hornmicro.selenium.ui
 import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 
+import java.util.Map.Entry
+
 import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.graphics.RGB
 import org.eclipse.swt.widgets.Display
-import java.util.Map.Entry
 
 @CompileStatic
 class Resources {
@@ -31,6 +32,17 @@ class Resources {
         }
         return colorCache[color]
     }
+    
+    static Color getColor(int red, int green, int blue) {
+        RGB color = new RGB(red, green, blue)
+        if(!colorCache.containsKey(color)) {
+            Display.getDefault().syncExec {
+                colorCache[color] = new Color(Display.getDefault(), color)
+            }
+        }
+        return colorCache[color]
+    }
+    
     
     static void dispose() {
         Display.getDefault().syncExec{

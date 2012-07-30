@@ -42,6 +42,9 @@ class PlayCurrent extends Action {
             (0..<testCaseTable.getItemCount()).each {
                 testCaseTable.getItem(it).setBackground(null)
             }
+            model.runs = 0
+            model.failures = 0
+            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
         }
         int index = model.testCases.indexOf(testCase)
         testCaseTable.getItem(index).setBackground(yellow)
@@ -72,6 +75,8 @@ class PlayCurrent extends Action {
     
     private void onComplete(TestCaseModel testCase) {
         testCaseTable.getItem(model.testCases.indexOf(testCase)).setBackground(green)
+        model.runs++
+        updateGreenBar()
     }
     
     private Closure _onSuccess(TestCaseModel testCase, boolean clearProgress, int index) {
@@ -84,6 +89,7 @@ class PlayCurrent extends Action {
         return { ->
             int index = model.testCases.indexOf(testCase)
             testCaseTable.getItem(index).setBackground(null)
+            updateGreenBar()
         }
     }
     
@@ -91,6 +97,18 @@ class PlayCurrent extends Action {
         return { ->
             int index = model.testCases.indexOf(testCase)
             testCaseTable.getItem(index).setBackground(red)
+            model.failures += 1
+            updateGreenBar()
+        }
+    }
+    
+    private updateGreenBar() {
+        if(model.failures > 0) {
+            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-failure.png"))
+        } else if(model.runs > 0) {
+            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-success.png"))
+        } else {
+            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
         }
     }
 }

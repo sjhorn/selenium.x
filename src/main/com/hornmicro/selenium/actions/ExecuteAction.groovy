@@ -65,6 +65,7 @@ class ExecuteAction extends Action implements Callable<Void> {
             
             // Highlight row
             table = controller.view.testCaseViewer.table
+            Table testCasesTable = controller.view.testCasesViewer.table
             
             if(clearProgress) {
                 (0..<table.getItemCount()).each { 
@@ -74,19 +75,25 @@ class ExecuteAction extends Action implements Callable<Void> {
             int index = tcm.tests.indexOf(tm)
             table.getItem(index).setBackground(yellow)
             table.setSelection(-1)
+            testCasesTable.setEnabled(false)
             
             log.info("Executing: | ${tm.command} | ${tm.target} | ${tm.value} |")
             future = executor.submit(this) // this schedule the call() method
             Thread.start {
                 try {
-                    future.get(30, TimeUnit.SECONDS)    
+                    future.get(10, TimeUnit.SECONDS)    
                 } catch(TimeoutException te) {
+                    future.cancel(true)
                     Display.default.asyncExec {
-                        log.error("Timed Out executing: ${te.message}")
+                        log.error("Timed out executing")
                     }
                 } catch(CancellationException ce) {
                     Display.default.asyncExec {
                         log.error("Cancelled: ${ce.message}")
+                    }
+                } finally {
+                    Display.default.asyncExec {
+                        testCasesTable.setEnabled(true)
                     }
                 }
             }
