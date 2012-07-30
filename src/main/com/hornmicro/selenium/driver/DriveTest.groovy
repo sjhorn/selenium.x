@@ -2,7 +2,6 @@ package com.hornmicro.selenium.driver
 
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebDriverBackedSelenium
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
@@ -17,6 +16,7 @@ import com.hornmicro.selenium.driver.api.CommandHandler
 import com.hornmicro.selenium.driver.api.CommandHandlerFactory
 import com.hornmicro.selenium.driver.api.SeleniumCommand
 import com.hornmicro.selenium.model.TestModel
+import com.opera.core.systems.OperaDriver
 import com.thoughtworks.selenium.Selenium
 
 class DriveTest {
@@ -40,6 +40,10 @@ class DriveTest {
                 
             case 'safari':
                 drivers['safari'] = new SafariDriver()
+                break
+                
+            case 'opera':
+                drivers['opera'] = new OperaDriver()
                 break
                 
             default:
@@ -73,9 +77,16 @@ class DriveTest {
     
     static executeAction(String browser, String baseUrl, TestModel test) {
         WebDriver driver = getDriver(browser)
+        
         SeleniumInstance si = getSeleniumInstance(baseUrl, driver)
         Selenium selenium = si.selenium
-        CommandHandlerFactory chf = si.commandHandlerFactory  
+        CommandHandlerFactory chf = si.commandHandlerFactory
+        
+        // Ensure the current window is selected in safari driver
+        if(test.command == "open") {
+            println ">>>> Focusing window now"
+            selenium.selectWindow("null")   
+        }
         
         SeleniumCommand command = new SeleniumCommand(test.command)
         CommandHandler handler = chf.getCommandHandler(command.command)
@@ -162,7 +173,7 @@ class DriveTest {
             Thread.sleep(800)
             js.executeScript("arguments[0].style.backgroundColor = '${bgcolor}'", element)
         } catch(e) {
-            println ">>>>> Ignoring $e.message"
+            //println ">>>>> Ignoring $e.message"
         }
     }
     

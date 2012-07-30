@@ -49,8 +49,8 @@ import com.hornmicro.selenium.model.TestSuiteModel
 
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
-    Action openAction
     Action executeAction
+    Action openAction
     Action findAction
     Action reloadAction
     Action addTestCaseAction
@@ -99,6 +99,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     protected void configureShell(Shell shell) {
         super.configureShell(shell)
         shell.text = "selenium.x"
+        shell.setImage(Resources.getImage("gfx/Selenium_x.png"))
         int displayWidth = Display.getDefault().getBounds().width
         shell.setBounds(displayWidth - 740, 1, 740, 700)
         shell.addDisposeListener(this)
@@ -113,12 +114,11 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
         wireView()
         
-        model.open(new File("/Users/shorn/dev/functional-testing/anz/Property Details/Test Suite"))
+        model.open(new File("test/Property Details/Test Suite"))
         
         return view
     }
     
-    @CompileStatic
     class TestCaseProvider extends StyledCellLabelProvider {
         void update(ViewerCell cell) {
             TestModel test = (TestModel) cell.element
@@ -136,6 +136,12 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
+        view.playCurrent.addSelectionListener(new SelectionAdapter() {
+            public void widgetSelected(SelectionEvent e) {
+                playCurrent.run()
+            }
+        })
+        
         
         // Bind the selected browser to the TestSuiteModel
         dbc.bindValue(
@@ -144,6 +150,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                     def firefox = ToolbarProperties.selection().observe(view.firefox) 
                     def chrome = ToolbarProperties.selection().observe(view.chrome)
                     def safari = ToolbarProperties.selection().observe(view.safari)
+                    def opera = ToolbarProperties.selection().observe(view.opera)
                     
                     if(firefox.getValue()) {
                         return "firefox"
@@ -151,6 +158,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                         return "chrome"
                     } else if(safari.getValue()) {
                         return "safari"
+                    } else if(opera.getValue()) {
+                        return "opera"
                     }
                     return "chrome"
                 }

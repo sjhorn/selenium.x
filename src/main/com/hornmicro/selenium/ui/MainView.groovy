@@ -27,7 +27,7 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 @CompileStatic
 class MainView extends Composite {
-    private ToolItem playOne
+    ToolItem playCurrent
     ToolItem firefox
     ToolItem chrome
     ToolItem ie8
@@ -153,8 +153,8 @@ class MainView extends Composite {
         item.image = Resources.getImage("gfx/PlayAll.png")
         item.enabled = false
         
-        playOne = new ToolItem (toolBar, SWT.PUSH)
-        playOne.image = Resources.getImage("gfx/PlayOne.png")
+        playCurrent = new ToolItem (toolBar, SWT.PUSH)
+        playCurrent.image = Resources.getImage("gfx/PlayOne.png")
         
         item = new ToolItem (toolBar, SWT.PUSH)
         item.image = Resources.getImage("gfx/Pause.png")
@@ -180,6 +180,10 @@ class MainView extends Composite {
         safari = new ToolItem (toolBar, SWT.RADIO)
         safari.image = Resources.getImage("gfx/safari.png")
         
+        opera = new ToolItem (toolBar, SWT.RADIO)
+        opera.image = Resources.getImage("gfx/opera.png")
+        //opera.enabled = false
+        
         ie8 = new ToolItem (toolBar, SWT.RADIO)
         ie8.image = Resources.getImage("gfx/ie8.png")
         ie8.enabled = false
@@ -188,9 +192,7 @@ class MainView extends Composite {
         ie9.image = Resources.getImage("gfx/ie9.png")
         ie9.enabled = false
         
-        opera = new ToolItem (toolBar, SWT.RADIO)
-        opera.image = Resources.getImage("gfx/opera.png")
-        opera.enabled = false
+        
         
         iphone = new ToolItem (toolBar, SWT.RADIO)
         iphone.image = Resources.getImage("gfx/iphone.png")
