@@ -14,6 +14,8 @@ class TestCaseModel {
     String baseURL = ""
     ObservableList tests = [ new TestModel(command:"hello", target:"what", value:"cool") ]
     TestModel selectedTest
+    TestModel lastRun
+    TestState state = TestState.UNKNOWN
     
     
     static TestCaseModel load(File file, String source=null, Node html=null) {

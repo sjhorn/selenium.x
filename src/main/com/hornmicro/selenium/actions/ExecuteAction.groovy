@@ -1,13 +1,14 @@
 package com.hornmicro.selenium.actions
 
-import java.util.concurrent.Callable
 import java.util.concurrent.CancellationException
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
+import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.jface.action.Action
 import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.graphics.RGB
@@ -17,11 +18,12 @@ import org.eclipse.swt.widgets.Table
 import com.hornmicro.selenium.driver.DriveTest
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
+import com.hornmicro.selenium.model.TestState
 import com.hornmicro.selenium.ui.MainController
 import com.hornmicro.selenium.ui.Resources
 import com.hornmicro.selenium.ui.MainView.Log
 
-class ExecuteAction extends Action implements Callable<Void> {
+class ExecuteAction extends Action {
     static final ExecutorService executor 
     static { executor = Executors.newSingleThreadExecutor() }
     static Future<Void> future
@@ -34,6 +36,7 @@ class ExecuteAction extends Action implements Callable<Void> {
     Closure onError
     Closure onCancelled
     Boolean clearProgress = true
+    Boolean runOne = true
     
     Log log
     TestCaseModel tcm
@@ -41,13 +44,14 @@ class ExecuteAction extends Action implements Callable<Void> {
     Table table
     
     
-    ExecuteAction(MainController controller, Boolean clearProgress=true, 
+    ExecuteAction(MainController controller, Boolean clearProgress=true, Boolean runOne=true,
             Closure onSuccess=null, Closure onError=null, Closure onCancelled=null) {
         super("E&xecute this command")
         setAccelerator((int)'x' )
         setToolTipText("Execute the currently selected command")
         this.controller = controller
         this.clearProgress = clearProgress
+        this.runOne = runOne
         this.onSuccess = onSuccess
         this.onError = onError
         this.onCancelled = onCancelled
@@ -63,66 +67,55 @@ class ExecuteAction extends Action implements Callable<Void> {
             // Cancel another thread if already running
             cancel()
             
-            // Highlight row
-            table = controller.view.testCaseViewer.table
-            Table testCasesTable = controller.view.testCasesViewer.table
+            // Hide selection
+            controller.view.testCaseViewer.table.setSelection(-1)
             
             if(clearProgress) {
-                (0..<table.getItemCount()).each { 
-                    table.getItem(it).setBackground(null)
+                tcm.state = runOne ? TestState.UNKNOWN : TestState.INPROGRESS
+                tcm.tests.each { TestModel tm_it ->
+                    tm_it.state = TestState.UNKNOWN
                 }
+                controller.view.testCasesViewer.refresh()
             }
-            int index = tcm.tests.indexOf(tm)
-            table.getItem(index).setBackground(yellow)
-            table.setSelection(-1)
-            testCasesTable.setEnabled(false)
+            tm.state = TestState.INPROGRESS
+            controller.view.testCaseViewer.refresh()
             
             log.info("Executing: | ${tm.command} | ${tm.target} | ${tm.value} |")
-            future = executor.submit(this) // this schedule the call() method
+            
+            future = executor.submit {
+                DriveTest.executeAction(controller.model.browser, tcm.baseURL, tm)
+            }
             Thread.start {
                 try {
-                    future.get(10, TimeUnit.SECONDS)    
-                } catch(TimeoutException te) {
-                    future.cancel(true)
+                    future.get(10, TimeUnit.SECONDS)
                     Display.default.asyncExec {
-                        log.error("Timed out executing")
+                        tm.state = TestState.SUCCESS
+                        onSuccess?.call()
+                    }
+                } catch(ExecutionException ee) {
+                    StackTraceUtils.deepSanitize(ee)
+                    Display.default.asyncExec {
+                        log.error(ee.cause.message)
+                        tm.state = TestState.FAILED
+                        onError?.call()
+                    }
+                } catch(TimeoutException te) {
+                    Display.default.asyncExec {
+                        log.error("Timed out")
+                        tm.state = TestState.FAILED
+                        onError?.call()
                     }
                 } catch(CancellationException ce) {
                     Display.default.asyncExec {
                         log.error("Cancelled: ${ce.message}")
+                        tm.state = TestState.UNKNOWN
+                        onCancelled.call()
                     }
                 } finally {
                     Display.default.asyncExec {
-                        testCasesTable.setEnabled(true)
+                        controller.view.testCaseViewer.refresh()
                     }
                 }
-            }
-        }
-    }
-    
-    Void call() {
-        Table table = controller.view.testCaseViewer.table
-        int index = tcm.tests.indexOf(tm)
-        
-        try {
-            DriveTest.executeAction(controller.model.browser, tcm.baseURL, tm)
-            Display.default.asyncExec {
-                table.getItem(index).setBackground(green)
-                onSuccess?.call()
-            }
-        } catch(e) {
-            System.err.println(e.message)
-            Display.default.asyncExec {
-                log.error(e.message)
-                table.getItem(index).setBackground(red)
-                onError?.call()
-            }
-        } finally {
-            Display.default.asyncExec {
-                if(index + 1 < table.getItemCount()) {
-                    index++
-                }
-                //table.setSelection(index)
             }
         }
     }

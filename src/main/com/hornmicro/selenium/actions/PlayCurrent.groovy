@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Table
 
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
+import com.hornmicro.selenium.model.TestState
 import com.hornmicro.selenium.model.TestSuiteModel
 import com.hornmicro.selenium.ui.MainController
 import com.hornmicro.selenium.ui.Resources
@@ -17,12 +18,6 @@ class PlayCurrent extends Action {
     MainController controller
     Boolean clearProgress
     TestSuiteModel model
-    
-    Color red = Resources.getColor(new RGB(0xFF, 0xCC, 0xCC))
-    Color yellow = Resources.getColor(new RGB(0xFF, 0xFF, 0xCC))
-    Color green = Resources.getColor(new RGB(0xEE, 0xFF, 0xEE))
-    Table testCaseTable
-    
     
     PlayCurrent(MainController controller, Boolean clearProgress=true) {
         super("Play Current Test")
@@ -34,36 +29,43 @@ class PlayCurrent extends Action {
         model = controller.model
     }
     
-    void run() {
-        testCaseTable = controller.view.testCasesViewer.table
-        
+    void run() {        
         TestCaseModel testCase = model.selectedTestCase
         if(clearProgress) {
-            (0..<testCaseTable.getItemCount()).each {
-                testCaseTable.getItem(it).setBackground(null)
+            model.testCases.each { TestCaseModel tcm ->
+                tcm.state = TestState.UNKNOWN
             }
             model.runs = 0
             model.failures = 0
             controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
         }
         int index = model.testCases.indexOf(testCase)
-        testCaseTable.getItem(index).setBackground(yellow)
-        testCaseTable.setSelection(-1)
+        
+        testCase.state = TestState.INPROGRESS
+        controller.view.testCasesViewer.table.setSelection(-1)
         
         if(testCase) {
+            controller.view.testCasesViewer.table.setEnabled(false)
             nextTest(testCase, true)
         }
     }
+    
+    void resume() {
+        
+    }
+    
     
     private TestModel nextTest(TestCaseModel testCase, Boolean clearProgress, index=0) {
         if(index >= testCase.tests.size()) {
             println "All done - woohoo!"
             onComplete(testCase)
-            
         } else if(testCase.tests[index]) {
             Display.default.asyncExec {
                 testCase.selectedTest = testCase.tests[index]
-                ExecuteAction ea = new ExecuteAction(controller, clearProgress, 
+                ExecuteAction ea = new ExecuteAction(
+                    controller, 
+                    clearProgress, 
+                    false,
                     _onSuccess(testCase, false, index+1),
                     _onError(testCase),
                     _onCancelled(testCase)
@@ -74,7 +76,7 @@ class PlayCurrent extends Action {
     }
     
     private void onComplete(TestCaseModel testCase) {
-        testCaseTable.getItem(model.testCases.indexOf(testCase)).setBackground(green)
+        testCase.state = TestState.SUCCESS
         model.runs++
         updateGreenBar()
     }
@@ -87,22 +89,22 @@ class PlayCurrent extends Action {
     
     private Closure _onCancelled(TestCaseModel testCase) {
         return { ->
-            int index = model.testCases.indexOf(testCase)
-            testCaseTable.getItem(index).setBackground(null)
+            testCase.state = TestState.UNKNOWN
             updateGreenBar()
         }
     }
     
     private Closure _onError(TestCaseModel testCase) {
         return { ->
-            int index = model.testCases.indexOf(testCase)
-            testCaseTable.getItem(index).setBackground(red)
+            testCase.state = TestState.FAILED
             model.failures += 1
             updateGreenBar()
         }
     }
     
     private updateGreenBar() {
+        controller.view.testCasesViewer.refresh()
+        controller.view.testCasesViewer.table.setEnabled(true)
         if(model.failures > 0) {
             controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-failure.png"))
         } else if(model.runs > 0) {

@@ -179,14 +179,14 @@ class MainView extends Composite {
         
         chrome = new ToolItem (toolBar, SWT.RADIO)
         chrome.image = Resources.getImage("gfx/chrome.png")
-        chrome.selection = true
+        
         
         safari = new ToolItem (toolBar, SWT.RADIO)
         safari.image = Resources.getImage("gfx/safari.png")
+        safari.selection = true
         
         opera = new ToolItem (toolBar, SWT.RADIO)
         opera.image = Resources.getImage("gfx/opera.png")
-        //opera.enabled = false
         
         ie8 = new ToolItem (toolBar, SWT.RADIO)
         ie8.image = Resources.getImage("gfx/ie8.png")

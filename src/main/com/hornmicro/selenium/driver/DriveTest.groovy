@@ -1,5 +1,10 @@
 package com.hornmicro.selenium.driver
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
@@ -16,6 +21,7 @@ import com.hornmicro.selenium.driver.api.CommandHandler
 import com.hornmicro.selenium.driver.api.CommandHandlerFactory
 import com.hornmicro.selenium.driver.api.SeleniumCommand
 import com.hornmicro.selenium.model.TestModel
+import com.hornmicro.selenium.model.TestState
 import com.opera.core.systems.OperaDriver
 import com.thoughtworks.selenium.Selenium
 
@@ -52,7 +58,10 @@ class DriveTest {
         
     }
     
+    
+    
     static WebDriver getDriver(String browser="Firefox") {
+        
         if(!drivers.containsKey(browser)) {
             loadDriver(browser)
         }
@@ -76,6 +85,7 @@ class DriveTest {
     }
     
     static executeAction(String browser, String baseUrl, TestModel test) {
+        test.state = TestState.INPROGRESS
         WebDriver driver = getDriver(browser)
         
         SeleniumInstance si = getSeleniumInstance(baseUrl, driver)
@@ -100,12 +110,15 @@ class DriveTest {
         
         if(res instanceof AssertResult) {
             if(res.passed) {
+                test.state = TestState.SUCCESS
                 println "Passed"
             } else {
+                test.state = TestState.FAILED
                 System.err.println("Failed [$res.failureMessage]")
                 throw new RuntimeException("Failed [$res.failureMessage]")
             }
         } else if(res instanceof AccessorResult) {
+            test.state = TestState.SUCCESS
             if(res?.terminationCondition) {
                 System.err.println "Term condition AccessorResult"
             } else {
@@ -120,15 +133,19 @@ class DriveTest {
                         while(!(r = res.terminationCondition())) {
                             Thread.sleep(100)
                         }
+                        test.state = TestState.SUCCESS
                         println "Success"
                     } catch(e) {
+                        test.state = TestState.FAILED
                         System.err.println "Failed ${e.message}"
                         throw new RuntimeException("Failed [$res.failureMessage]")
                     }
                 } else {
+                    test.state = TestState.SUCCESS
                     println "Action result ${res.terminationCondition}"
                 }
             } else {
+                test.state = TestState.SUCCESS
                 println "Done"
             }
         }
@@ -178,15 +195,24 @@ class DriveTest {
     }
     
     static void dispose() {
-        drivers.each { String name, WebDriver driver ->
-            println "Closing ${name}"
-            try {
-                driver.quit()
-            } catch(e) {
-                e.printStackTrace()
+        ExecutorService executor = Executors.newSingleThreadExecutor()
+        Future<Void> future = executor.submit({ ->
+                drivers.each { String name, WebDriver driver ->
+                    println "Closing ${name}"
+                    try {
+                        driver.quit()
+                    } catch(e) {
+                        e.printStackTrace()
+                    }
+                    println "Done"
+                }
+                drivers.clear()
             }
-            println "Done"
+        )
+        try {
+            future.get(4, TimeUnit.SECONDS)
+        } catch(e) {
+            // Dont care. Took too long. 
         }
-        drivers.clear()
     }
 }

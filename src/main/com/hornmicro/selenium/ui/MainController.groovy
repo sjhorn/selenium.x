@@ -2,13 +2,12 @@ package com.hornmicro.selenium.ui
 
 import groovy.transform.CompileStatic
 
-import java.beans.PropertyChangeListener
-
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.PojoProperties
 import org.eclipse.core.databinding.observable.value.ComputedValue
+import org.eclipse.core.databinding.observable.value.WritableValue
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
 import org.eclipse.jface.action.Separator
@@ -29,6 +28,7 @@ import org.eclipse.swt.events.MouseAdapter
 import org.eclipse.swt.events.MouseEvent
 import org.eclipse.swt.events.SelectionAdapter
 import org.eclipse.swt.events.SelectionEvent
+import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Control
@@ -45,6 +45,7 @@ import com.hornmicro.selenium.actions.RemoveTestCaseAction
 import com.hornmicro.selenium.driver.DriveTest
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
+import com.hornmicro.selenium.model.TestState
 import com.hornmicro.selenium.model.TestSuiteModel
 
 
@@ -119,19 +120,38 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         return view
     }
     
-    class TestCaseProvider extends StyledCellLabelProvider {
+    class TestLabelProvider extends StyledCellLabelProvider {
         void update(ViewerCell cell) {
-            TestModel test = (TestModel) cell.element
             def col = cell.columnIndex
+            def test = cell.element
+            if(test instanceof TestModel) {
+                cell.text = 
+                    col == 0 ? test.command : 
+                    col == 1 ? test.target :
+                    col == 2 ? test.value : ""
+            } else {
+                cell.text = test.name
+            }
             
-            cell.text = 
-                col == 0 ? test.command : 
-                col == 1 ? test.target :
-                col == 2 ? test.value : ""
-            
-            cell.setBackground(Display.default.getSystemColor(SWT.COLOR_YELLOW))    
+            Color cellBg  
+            switch(test.state) {
+                case TestState.INPROGRESS:
+                    cellBg = Resources.getColor(0xFF, 0xFF, 0xCC) // yellow
+                    break
+                case TestState.SUCCESS:
+                    cellBg =  Resources.getColor(0xEE, 0xFF, 0xEE) // green
+                    break
+                case TestState.FAILED:
+                    cellBg =  Resources.getColor(0xFF, 0xCC, 0xCC) // red
+                    break
+                default: 
+                    cellBg = null
+                    break
+            }
+            cell.setBackground(cellBg)
             super.update(cell)
         }
+        
     }
     
     void wireView() {
@@ -141,7 +161,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                 playCurrent.run()
             }
         })
-        
         
         // Bind the selected browser to the TestSuiteModel
         dbc.bindValue(
@@ -180,6 +199,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             BeanProperties.list("testCases", ObservableList).observe(model), // list of testCases
             BeanProperties.values(["name"] as String[]) // labels
         )
+        view.testCasesViewer.setLabelProvider(new TestLabelProvider())
         
         dbc.bindValue(
             WidgetProperties.text().observe(view.runs),
@@ -200,7 +220,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             BeanProperties.list("tests", ObservableList).observeDetail(testCaseSelection),
             BeanProperties.values(["command", "target", "value"] as String[]) // labels
         )
-        //view.testCaseViewer.labelProvider(new TestCaseProvider())
+        view.testCaseViewer.setLabelProvider(new TestLabelProvider())
         
         // Connect the current test case selection to the TestSuite model. 
         dbc.bindValue(
@@ -273,19 +293,31 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             }
         })
         
-        
-        
         // Select the first command when we change test cases
-        model.addPropertyChangeListener("selectedTestCase", [ propertyChange: { e ->
-            if(model?.selectedTestCase?.tests?.size()) { 
-                Display.default.asyncExec { 
-                    view.testCaseViewer.setSelection(new StructuredSelection(model.selectedTestCase.tests[0]), true);
+        dbc.bindValue(
+            ViewerProperties.singleSelection().observe(view.testCasesViewer),
+            new WritableValue() {
+                void doSetValue(Object sel) {
+                    if(model?.selectedTestCase?.tests?.size()) {
+                        view.testCaseViewer.setSelection(new StructuredSelection(model.selectedTestCase.tests[0]))
+                    }
                 }
             }
-        }] as PropertyChangeListener)
+        )
         
-        
-        
+        // Watch for test state change and let the lableprovider know
+        dbc.bindValue(
+            BeanProperties.value("selectedTestCase", TestCaseModel)
+                            .value("selectedTest", TestModel)
+                            .observe(model),
+            new WritableValue() {
+                void doSetValue(Object value) {
+                    if(value) {
+                        view.testCaseViewer.refresh() // refresh the labels and reveal
+                    }
+                }
+            }
+        )
     }
     
     void reload() {
