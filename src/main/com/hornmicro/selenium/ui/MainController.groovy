@@ -156,11 +156,10 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
-        view.playCurrent.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected(SelectionEvent e) {
-                playCurrent.run()
-            }
-        })
+        
+        Actions.selection(view.playCurrent).connect(playCurrent)
+        
+        
         
         // Bind the selected browser to the TestSuiteModel
         dbc.bindValue(

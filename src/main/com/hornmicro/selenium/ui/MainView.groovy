@@ -168,9 +168,9 @@ class MainView extends Composite {
         item.image = Resources.getImage("gfx/Step.png")
         item.enabled = false
         
-        item = new ToolItem (toolBar, SWT.PUSH)
-        item.image = Resources.getImage("gfx/Continue.png")
-        item.enabled = false
+//        item = new ToolItem (toolBar, SWT.PUSH)
+//        item.image = Resources.getImage("gfx/Continue.png")
+//        item.enabled = false
         
         item = new ToolItem (toolBar, SWT.SEPARATOR)
         
