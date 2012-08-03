@@ -4,14 +4,15 @@ import groovy.transform.CompileStatic
 
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.IAction
+import org.eclipse.jface.resource.ImageDescriptor
 import org.eclipse.jface.util.IPropertyChangeListener
 import org.eclipse.jface.util.PropertyChangeEvent
 import org.eclipse.swt.SWT
 import org.eclipse.swt.events.DisposeEvent
 import org.eclipse.swt.events.DisposeListener
+import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Button
-import org.eclipse.swt.widgets.Control
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Event
 import org.eclipse.swt.widgets.Listener
@@ -21,17 +22,17 @@ import org.eclipse.swt.widgets.Widget
 @CompileStatic
 class Actions implements Listener, DisposeListener, IPropertyChangeListener {
     int eventId
-    Control control
+    Widget widget
     Action action
     
-    static Actions selection(Control control) {
-        return new Actions(control: control, eventId: SWT.Selection)
+    static Actions selection(Widget widget) {
+        return new Actions(widget: widget, eventId: SWT.Selection)
     }
     
     void connect(Action action) {
         this.action = action
-        control.addListener(eventId, this)
-        control.addDisposeListener(this)
+        widget.addListener(eventId, this)
+        widget.addDisposeListener(this)
         action.addPropertyChangeListener(this)
     }
      
@@ -41,25 +42,36 @@ class Actions implements Listener, DisposeListener, IPropertyChangeListener {
     }
 
     void widgetDisposed(DisposeEvent event) {
-        control?.removeListener(eventId, this)
+        widget?.removeListener(eventId, this)
     }
 
     void propertyChange(PropertyChangeEvent pe) {
         switch(pe.getProperty()) {
             case IAction.ENABLED:
-                control.setEnabled(pe.getNewValue() as boolean)
+                try {
+                    widget.invokeMethod("setEnabled", pe.getNewValue() as boolean)
+                } catch(e) {
+                    // We can only try
+                }
                 break
             case IAction.IMAGE:
-                println "Image changed to ${pe.getNewValue()}"
+                if( pe.getNewValue() instanceof ImageDescriptor) {
+                    try {
+                        ImageDescriptor id = (ImageDescriptor) pe.getNewValue()
+                        widget.invokeMethod("setImage", id.createImage())
+                    } catch(e) {
+                        // We can only try. 
+                    }
+                }
                 break
         }
     }
-    
     
     static class TestAction extends Action {
         void run() {
             println "w00ted"
             setEnabled(false)
+            setImageDescriptor(ImageDescriptor.createFromImage(new Image(Display.getDefault(), "gfx/safari.png")))
         }
     }
     static main(args) {

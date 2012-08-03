@@ -160,7 +160,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         Actions.selection(view.playCurrent).connect(playCurrent)
         
         
-        
         // Bind the selected browser to the TestSuiteModel
         dbc.bindValue(
             new ComputedValue() {

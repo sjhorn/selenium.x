@@ -112,12 +112,17 @@ class ExecuteAction extends Action {
                         onCancelled.call()
                     }
                 } finally {
+                    future = null
                     Display.default.asyncExec {
                         controller.view.testCaseViewer.refresh()
                     }
                 }
             }
         }
+    }
+    
+    boolean isRunning() {
+        return future != null
     }
     
     void cancel() {
