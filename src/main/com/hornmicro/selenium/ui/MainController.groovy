@@ -39,10 +39,13 @@ import com.hornmicro.selenium.actions.AddTestCaseAction
 import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.FindAction
 import com.hornmicro.selenium.actions.OpenAction
-import com.hornmicro.selenium.actions.PlayCurrent
+import com.hornmicro.selenium.actions.PauseResumeAction
+import com.hornmicro.selenium.actions.PlayAllAction
+import com.hornmicro.selenium.actions.PlayCurrentAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
 import com.hornmicro.selenium.driver.DriveTest
+import com.hornmicro.selenium.model.RunState
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
 import com.hornmicro.selenium.model.TestState
@@ -56,7 +59,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     Action reloadAction
     Action addTestCaseAction
     Action removeTestCaseAction
-    Action playCurrent
+    PauseResumeAction pauseResumeAction
+    PlayCurrentAction playCurrentAction
+    Action playAllAction
     
     
     TestSuiteModel model = new TestSuiteModel()
@@ -74,7 +79,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         addTestCaseAction = new AddTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
         
-        playCurrent = new PlayCurrent(this)
+        playCurrentAction = new PlayCurrentAction(this)
+        pauseResumeAction = new PauseResumeAction(this)
+        playAllAction = new PlayAllAction(this)
         
         addMenuBar()
         setExceptionHandler(this)
@@ -154,11 +161,21 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         
     }
     
+    void setRunning(RunState state) {
+        executeAction.setEnabled(state != RunState.RUNNING)
+        playAllAction.setEnabled(state != RunState.RUNNING)
+        playCurrentAction.setEnabled(state != RunState.RUNNING)
+        pauseResumeAction.setEnabled(state != RunState.STOPPED)
+    }
+    
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
         
-        Actions.selection(view.playCurrent).connect(playCurrent)
+        Actions.selection(view.playCurrent).connect(playCurrentAction)
+        Actions.selection(view.pauseResume).connect(pauseResumeAction)
+        Actions.selection(view.playAll).connect(playAllAction)
         
+        setRunning(RunState.STOPPED)
         
         // Bind the selected browser to the TestSuiteModel
         dbc.bindValue(
@@ -358,7 +375,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         editMenu.add(selectAllAction)
         */
         menuManager.add(actionsMenu)
-        actionsMenu.add(playCurrent)
+        actionsMenu.add(playCurrentAction)
+        actionsMenu.add(pauseResumeAction)
         actionsMenu.add(new Separator())
         actionsMenu.add(executeAction)
         return menuManager

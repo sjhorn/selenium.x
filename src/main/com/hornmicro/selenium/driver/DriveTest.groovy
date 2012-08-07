@@ -111,7 +111,7 @@ class DriveTest {
         if(res instanceof AssertResult) {
             if(res.passed) {
                 test.state = TestState.SUCCESS
-                println "Passed"
+                //println "Passed"
             } else {
                 test.state = TestState.FAILED
                 System.err.println("Failed [$res.failureMessage]")
@@ -122,11 +122,11 @@ class DriveTest {
             if(res?.terminationCondition) {
                 System.err.println "Term condition AccessorResult"
             } else {
-                println "Accessor Result ${res.result}"
+                //println "Accessor Result ${res.result}"
             }
         } else { // ActionResult
             if(res?.terminationCondition) {
-                println "Term condition ActionResult"
+                //println "Term condition ActionResult"
                 if(res.terminationCondition instanceof Closure) {
                     try {
                         def r
@@ -134,7 +134,7 @@ class DriveTest {
                             Thread.sleep(100)
                         }
                         test.state = TestState.SUCCESS
-                        println "Success"
+                        //println "Success"
                     } catch(e) {
                         test.state = TestState.FAILED
                         System.err.println "Failed ${e.message}"
@@ -142,14 +142,14 @@ class DriveTest {
                     }
                 } else {
                     test.state = TestState.SUCCESS
-                    println "Action result ${res.terminationCondition}"
+                    //println "Action result ${res.terminationCondition}"
                 }
             } else {
                 test.state = TestState.SUCCESS
-                println "Done"
+                //println "Done"
             }
         }
-        println ("_"*40)+"\n\n"
+        //println ("_"*40)+"\n\n"
     }
     
     static Boolean findElement(String browser, String baseURL, String target) {

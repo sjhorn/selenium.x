@@ -28,9 +28,11 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 @CompileStatic
 class MainView extends Composite {
-    private Label greenBar
-    private Label failures
-    private Label runs
+    private ToolItem playAll
+    Label greenBar
+    Label failures
+    Label runs
+    ToolItem pauseResume
     ToolItem playCurrent
     ToolItem firefox
     ToolItem chrome
@@ -153,24 +155,18 @@ class MainView extends Composite {
         item.setControl(scale)
         
         
-        item = new ToolItem (toolBar, SWT.PUSH)
-        item.image = Resources.getImage("gfx/PlayAll.png")
-        item.enabled = false
+        playAll = new ToolItem (toolBar, SWT.PUSH)
+        playAll.image = Resources.getImage("gfx/PlayAll.png")
         
         playCurrent = new ToolItem (toolBar, SWT.PUSH)
         playCurrent.image = Resources.getImage("gfx/PlayOne.png")
         
-        item = new ToolItem (toolBar, SWT.PUSH)
-        item.image = Resources.getImage("gfx/Pause.png")
-        item.enabled = false
+        pauseResume = new ToolItem (toolBar, SWT.PUSH)
+        pauseResume.image = Resources.getImage("gfx/Pause.png")
         
         item = new ToolItem (toolBar, SWT.PUSH)
         item.image = Resources.getImage("gfx/Step.png")
         item.enabled = false
-        
-//        item = new ToolItem (toolBar, SWT.PUSH)
-//        item.image = Resources.getImage("gfx/Continue.png")
-//        item.enabled = false
         
         item = new ToolItem (toolBar, SWT.SEPARATOR)
         
