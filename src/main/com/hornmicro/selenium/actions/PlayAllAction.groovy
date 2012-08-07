@@ -49,11 +49,9 @@ class PlayAllAction extends Action {
                 model.selectedTestCase = model.testCases[index]
                 model.selectedTestCase.selectedTest = model.selectedTestCase.tests[0]
                 
-                PlayCurrentAction pc = new PlayCurrentAction(
-                    controller, 
-                    false,
-                    { -> nextTest(index++) }
-                )
+                PlayCurrentAction pc = controller.playCurrentAction
+                pc.clearProgress = false
+                pc.onComplete = { -> nextTest(index+1) }
                 pc.run()
             }
         }

@@ -37,6 +37,7 @@ class PlayCurrentAction extends Action {
             
             if(clearProgress) {
                 testCase.paused = false
+                onComplete = null
                 model.testCases.each { TestCaseModel tcm ->
                     tcm.state = TestState.UNKNOWN
                 }
