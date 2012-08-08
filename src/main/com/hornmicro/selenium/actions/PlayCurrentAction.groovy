@@ -1,5 +1,7 @@
 package com.hornmicro.selenium.actions
 
+import java.util.concurrent.TimeUnit
+
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.resource.ImageDescriptor
 import org.eclipse.swt.SWT
@@ -20,7 +22,7 @@ class PlayCurrentAction extends Action {
     
     PlayCurrentAction(MainController controller, Boolean clearProgress=true, Closure onComplete=null) {
         super("Play current test")
-        setAccelerator(SWT.MOD1 + (int)'1' )
+        setAccelerator(SWT.MOD1 + (int)'2' )
         setToolTipText("Play current test")
         setImageDescriptor(ImageDescriptor.createFromImage(Resources.getImage("gfx/PlayOne.png")))
         
@@ -108,6 +110,10 @@ class PlayCurrentAction extends Action {
     
     private Closure _onSuccess(TestCaseModel testCase, boolean clearProgress, int index) {
         return { ->
+            if(model.delay) {
+                println "Delaying for ${model.delay * 15}"
+                TimeUnit.MILLISECONDS.sleep( (model.delay * 15) as long)
+            }
             nextTest(testCase, clearProgress, index)
         }
     }
@@ -128,15 +134,17 @@ class PlayCurrentAction extends Action {
     }
     
     private updateGreenBar() {
-        controller.setRunning(RunState.STOPPED)
-        controller.view.testCasesViewer.refresh()
-        controller.view.testCasesViewer.table.setEnabled(true)
-        if(model.failures > 0) {
-            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-failure.png"))
-        } else if(model.runs > 0) {
-            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-success.png"))
-        } else {
-            controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
+        Display.default.asyncExec {
+            controller.setRunning(RunState.STOPPED)
+            controller.view.testCasesViewer.refresh()
+            controller.view.testCasesViewer.table.setEnabled(true)
+            if(model.failures > 0) {
+                controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-failure.png"))
+            } else if(model.runs > 0) {
+                controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-success.png"))
+            } else {
+                controller.view.greenBar.setBackgroundImage(Resources.getImage("gfx/progress-background.png"))
+            }
         }
     }
 }

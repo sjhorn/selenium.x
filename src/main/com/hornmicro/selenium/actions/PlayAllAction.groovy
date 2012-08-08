@@ -18,7 +18,7 @@ class PlayAllAction extends Action {
     
     PlayAllAction(MainController controller, Boolean clearProgress=true) {
         super("Play all tests")
-        setAccelerator(SWT.MOD1 + (int)'3' )
+        setAccelerator(SWT.MOD1 + (int)'1' )
         setToolTipText("Play all tests")
         setImageDescriptor(ImageDescriptor.createFromImage(Resources.getImage("gfx/PlayAll.png")))
         

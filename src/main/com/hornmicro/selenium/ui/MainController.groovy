@@ -121,7 +121,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         view.createContents()
         
         wireView()
-        
+        setRunning(RunState.STOPPED)
         model.open(new File("test/Property Details/Test Suite"))
         
         return view
@@ -171,11 +171,14 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     void wireView() {
         DataBindingContext dbc = new DataBindingContext()
         
+        dbc.bindValue(
+            BeanProperties.value("delay").observe(model),
+            WidgetProperties.selection().observe(view.scale)
+        )
+        
         Actions.selection(view.playCurrent).connect(playCurrentAction)
         Actions.selection(view.pauseResume).connect(pauseResumeAction)
         Actions.selection(view.playAll).connect(playAllAction)
-        
-        setRunning(RunState.STOPPED)
         
         // Bind the selected browser to the TestSuiteModel
         dbc.bindValue(
@@ -304,6 +307,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         // Listen to the Find Button
         view.findTarget.addSelectionListener(new SelectionAdapter() {
             void widgetSelected(SelectionEvent se) {
+                println model.delay
                 findAction.run()
             }
         })
@@ -375,6 +379,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         editMenu.add(selectAllAction)
         */
         menuManager.add(actionsMenu)
+        actionsMenu.add(playAllAction)
         actionsMenu.add(playCurrentAction)
         actionsMenu.add(pauseResumeAction)
         actionsMenu.add(new Separator())

@@ -88,10 +88,8 @@ class ExecuteAction extends Action {
             Thread.start {
                 try {
                     future.get(10, TimeUnit.SECONDS)
-                    Display.default.asyncExec {
-                        tm.state = TestState.SUCCESS
-                        onSuccess?.call()
-                    }
+                    tm.state = TestState.SUCCESS
+                    onSuccess?.call()
                 } catch(ExecutionException ee) {
                     StackTraceUtils.deepSanitize(ee)
                     Display.default.asyncExec {

@@ -28,6 +28,7 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 @CompileStatic
 class MainView extends Composite {
+    private Scale scale
     private ToolItem playAll
     Label greenBar
     Label failures
@@ -147,7 +148,7 @@ class MainView extends Composite {
         toolBar.layoutData = "growx, span 2, wrap"
         
         ToolItem item = new ToolItem (toolBar, SWT.SEPARATOR)
-        Scale scale = new Scale(toolBar, SWT.BORDER)
+        scale = new Scale(toolBar, SWT.BORDER)
         scale.setSize(100, 16)
         scale.setMaximum (100)
         scale.setPageIncrement(5)

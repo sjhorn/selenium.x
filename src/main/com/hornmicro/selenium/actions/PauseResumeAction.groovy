@@ -16,7 +16,7 @@ class PauseResumeAction extends Action {
     
     PauseResumeAction(MainController controller) {
         super("Pause/Resume Current Test")
-        setAccelerator(SWT.MOD1 + (int)'2' )
+        setAccelerator(SWT.MOD1 + (int)'3' )
         setToolTipText("Pause/Resume Current Test")
         setImageDescriptor(ImageDescriptor.createFromImage(Resources.getImage("gfx/Pause.png")))
         this.controller = controller
