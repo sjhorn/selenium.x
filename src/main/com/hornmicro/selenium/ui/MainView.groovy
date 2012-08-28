@@ -313,23 +313,25 @@ class MainView extends Composite {
         
         form.weights = [30, 70]
         
+        final String style = "<style>body { font-family: 'Lucida Grande', Helvetica, Arial; font-size: 10pt }</style>"
+        
         TabFolder footerTabs = new TabFolder(vform, SWT.BORDER)
         TabItem logti = new TabItem(footerTabs, SWT.NONE)
         logti.text = "Log"
         logControl = new Browser(footerTabs, SWT.BORDER)
-        logControl.text = ""
+        logControl.text = style
         logti.control = logControl
         
         TabItem refti = new TabItem(footerTabs, SWT.NONE)
         refti.text = "Reference"
         Browser reference = new Browser(footerTabs, SWT.BORDER)
-        reference.text = "<h2>Reference todo...</h2>"
+        reference.text = style+"<h2>Reference todo...</h2>"
         refti.control = reference
         
         TabItem uielti = new TabItem(footerTabs, SWT.NONE)
         uielti.text = "UI-Element"
         Browser uiElement = new Browser(footerTabs, SWT.BORDER)
-        uiElement.setText("<h2>UI-Element todo...</h2>")
+        uiElement.text = style+"<h2>UI-Element todo...</h2>"
         uielti.control = uiElement
         
         footerTabs.pack()

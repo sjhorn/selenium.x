@@ -35,15 +35,20 @@ import org.eclipse.swt.widgets.Control
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
 
-import com.hornmicro.selenium.actions.AddTestCaseAction
 import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.FindAction
+import com.hornmicro.selenium.actions.NewTestCaseAction
+import com.hornmicro.selenium.actions.NewTestSuiteAction
 import com.hornmicro.selenium.actions.OpenAction
 import com.hornmicro.selenium.actions.PauseResumeAction
 import com.hornmicro.selenium.actions.PlayAllAction
 import com.hornmicro.selenium.actions.PlayCurrentAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
+import com.hornmicro.selenium.actions.SaveTestCaseAction
+import com.hornmicro.selenium.actions.SaveTestCaseAsAction
+import com.hornmicro.selenium.actions.SaveTestSuiteAction
+import com.hornmicro.selenium.actions.SaveTestSuiteAsAction
 import com.hornmicro.selenium.driver.DriveTest
 import com.hornmicro.selenium.model.RunState
 import com.hornmicro.selenium.model.TestCaseModel
@@ -53,11 +58,16 @@ import com.hornmicro.selenium.model.TestSuiteModel
 
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
+    private Action newTestSuiteAction
+    private Action saveTestSuiteAsAction
+    private Action saveTestSuiteAction
+    private Action saveTestCaseAsAction
+    private Action saveTestCaseAction
     Action executeAction
     Action openAction
     Action findAction
     Action reloadAction
-    Action addTestCaseAction
+    Action newTestCaseAction
     Action removeTestCaseAction
     PauseResumeAction pauseResumeAction
     PlayCurrentAction playCurrentAction
@@ -72,11 +82,18 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         super(null)
         
         openAction = new OpenAction(this)
+        saveTestCaseAction = new SaveTestCaseAction(this)
+        saveTestCaseAsAction = new SaveTestCaseAsAction(this)
+        
+        newTestSuiteAction = new NewTestSuiteAction(this)
+        saveTestSuiteAction = new SaveTestSuiteAction(this)
+        saveTestSuiteAsAction = new SaveTestSuiteAsAction(this)
+        
         executeAction = new ExecuteAction(this)
         findAction = new FindAction(this)
         
         reloadAction = new ReloadAction(this)
-        addTestCaseAction = new AddTestCaseAction(this)
+        newTestCaseAction = new NewTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
         
         playCurrentAction = new PlayCurrentAction(this)
@@ -360,6 +377,14 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     
         menuManager.add(fileMenu)
         fileMenu.add(openAction)
+        fileMenu.add(new Separator())
+        fileMenu.add(newTestCaseAction)
+        fileMenu.add(saveTestCaseAction)
+        fileMenu.add(saveTestCaseAsAction)
+        fileMenu.add(new Separator())
+        fileMenu.add(newTestSuiteAction)
+        fileMenu.add(saveTestSuiteAction)
+        fileMenu.add(saveTestSuiteAsAction)
         
         /*
         fileMenu.add(saveAction)

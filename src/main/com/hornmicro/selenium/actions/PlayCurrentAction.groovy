@@ -75,7 +75,6 @@ class PlayCurrentAction extends Action {
     
     private void nextTest(TestCaseModel testCase, Boolean clearProgress, int index=0) {
         if(index >= testCase.tests.size()) {
-            println "All done - woohoo!"
             onComplete(testCase)
         } else if(testCase.paused) {
             onPause()
@@ -111,7 +110,6 @@ class PlayCurrentAction extends Action {
     private Closure _onSuccess(TestCaseModel testCase, boolean clearProgress, int index) {
         return { ->
             if(model.delay) {
-                println "Delaying for ${model.delay * 15}"
                 TimeUnit.MILLISECONDS.sleep( (model.delay * 15) as long)
             }
             nextTest(testCase, clearProgress, index)

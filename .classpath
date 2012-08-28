@@ -24,5 +24,6 @@
 	<classpathentry kind="lib" path="libs/selenium-server-standalone-2.25.0.jar" sourcepath="/Users/shorn/Downloads/selenium-2.25.0/selenium-server-2.25.0-srcs.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Java SE 6 (MacOS X Default)"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="output" path="target/java/classes"/>
 </classpath>

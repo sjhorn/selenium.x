@@ -1,13 +1,18 @@
 package com.hornmicro.selenium.actions
 
 import org.eclipse.jface.action.Action
+import org.eclipse.swt.SWT
 
-import com.hornmicro.selenium.model.TestCaseModel;
+import com.hornmicro.selenium.model.TestCaseModel
 
-class AddTestCaseAction extends Action {
+class NewTestCaseAction extends Action {
     def controller 
     
-    AddTestCaseAction(controller) {
+    NewTestCaseAction(controller) {
+        super("New Test Case")
+        setAccelerator(SWT.MOD1 + (int)'N' )
+        setToolTipText("New Test Case")
+        
         this.controller = controller    
     }
     

@@ -1,6 +1,8 @@
 package com.hornmicro.selenium.model
 
 import groovy.beans.Bindable
+import groovy.xml.MarkupBuilder
+
 import org.ccil.cowan.tagsoup.Parser
 
 @Bindable
@@ -62,4 +64,53 @@ class TestSuiteModel {
             )
         }  
     }
+    
+    Status save() {
+        if(file) {
+            String header = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>${name}</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium">
+"""
+            StringWriter writer = new StringWriter()
+            MarkupBuilder builder = new MarkupBuilder(writer)
+            builder.tbody() {
+                tr() { b(name) }
+                testCases.each { TestCaseModel testCase ->
+                    tr() {
+                        td() {
+                            a(href:relativize(file, testCase.file)) { 
+                                fileWithoutExtension(testCase.file)
+                            }
+                        }
+                    }
+                }
+            }
+            String footer = '''</table>
+</body>
+</html>
+'''
+            try {
+                file.text = header + writer.toString() + footer
+                return new Status(success:true, code: 0, message:"All good")
+            } catch(Exception e) {
+                return new Status(success:false, code: 1, message:e.message)
+            }
+        } else {
+            return new Status(success:false, code: 1, message:"No file supplied")
+        }
+    }
+    
+    private String relativize(File base, File relative) {
+        return base.toURI().relativize(relative.toURI())
+    }
+    private String fileWithoutExtension(File file) {
+        return file?.name?.split('\\.')?.getAt(0) ?: ''
+    }
+    
 }
