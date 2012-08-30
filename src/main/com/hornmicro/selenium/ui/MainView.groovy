@@ -28,6 +28,8 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 @CompileStatic
 class MainView extends Composite {
+    private Label removeTest
+    private Label addTest
     private Scale scale
     private ToolItem playAll
     Label greenBar
@@ -268,7 +270,7 @@ class MainView extends Composite {
         TabItem tbItem = new TabItem (tabFolder, SWT.NONE)
         tbItem.text = "Table"
         Composite tableHolder = new Composite(tabFolder, SWT.NONE)
-        tableHolder.layout = new MigLayout("inset 2","[][grow][]", "[fill, grow][][][]")
+        tableHolder.layout = new MigLayout("inset 2","[][grow][]", "[fill, grow][][][][]")
         
         testCaseViewer = new TableViewer(tableHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
         Table table = testCaseViewer.table 
@@ -280,6 +282,12 @@ class MainView extends Composite {
             col.text = text
             col.width = width
         }
+        Composite testTools = new Composite(tableHolder, SWT.NONE) 
+        ToolLabels testToolLabels = new ToolLabels(testTools)
+        addTest = testToolLabels.label(tip: "Add Test", image:"gfx/button_add.png")
+        removeTest = testToolLabels.label(tip: "Remove Test", image:"gfx/button_remove.png")
+        testTools.layoutData = "span 3, wrap, growx"
+        testTools.layout = new MigLayout("inset 0, gap 0")
         
         // Command
         new Label(tableHolder, SWT.NONE).text = "Command"

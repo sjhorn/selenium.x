@@ -20,6 +20,18 @@ class TestSuiteModel {
     Boolean dirty = false
     long delay = 0
     
+    void clear() {
+        setFile(null)
+        setName("Test Suite")
+        testCases.clear()
+        testCases.add(new TestCaseModel())
+        setSelectedTestCase(testCases[0])
+        setLastRun(null)
+        setRuns(0)
+        setFailures(0)
+        setDirty(false)
+    }
+    
     Status open(File file) {
         if(file.exists()) {
             String source = file.text

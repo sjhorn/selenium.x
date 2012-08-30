@@ -35,8 +35,10 @@ import org.eclipse.swt.widgets.Control
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
 
+import com.hornmicro.selenium.actions.AddCommandAction
 import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.FindAction
+import com.hornmicro.selenium.actions.InsertCommandAction
 import com.hornmicro.selenium.actions.NewTestCaseAction
 import com.hornmicro.selenium.actions.NewTestSuiteAction
 import com.hornmicro.selenium.actions.OpenAction
@@ -44,6 +46,7 @@ import com.hornmicro.selenium.actions.PauseResumeAction
 import com.hornmicro.selenium.actions.PlayAllAction
 import com.hornmicro.selenium.actions.PlayCurrentAction
 import com.hornmicro.selenium.actions.ReloadAction
+import com.hornmicro.selenium.actions.RemoveCommandAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
 import com.hornmicro.selenium.actions.SaveTestCaseAction
 import com.hornmicro.selenium.actions.SaveTestCaseAsAction
@@ -69,6 +72,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     Action reloadAction
     Action newTestCaseAction
     Action removeTestCaseAction
+    Action addCommandAction
+    Action insertCommandAction
+    Action removeCommandAction
     PauseResumeAction pauseResumeAction
     PlayCurrentAction playCurrentAction
     Action playAllAction
@@ -95,6 +101,10 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         reloadAction = new ReloadAction(this)
         newTestCaseAction = new NewTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
+        
+        addCommandAction = new AddCommandAction(this)
+        insertCommandAction = new InsertCommandAction(this)
+        removeCommandAction = new RemoveCommandAction(this)
         
         playCurrentAction = new PlayCurrentAction(this)
         pauseResumeAction = new PauseResumeAction(this)
@@ -310,7 +320,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         // Listen to the add test case tool
         view.addTestCase.addMouseListener(new MouseAdapter() {
             void mouseUp(MouseEvent e) {
-                MainController.this.addTestCaseAction.run()
+                MainController.this.newTestCaseAction.run()
             }
         })
         
@@ -321,10 +331,23 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             }
         })
         
+        // Listen to the add test tool
+        view.addTest.addMouseListener(new MouseAdapter() {
+            void mouseUp(MouseEvent e) {
+                MainController.this.addCommandAction.run()
+            }
+        })
+        
+        // Listen to the remove test tool
+        view.removeTest.addMouseListener(new MouseAdapter() {
+            void mouseUp(MouseEvent e) {
+                MainController.this.removeCommandAction.run()
+            }
+        })
+        
         // Listen to the Find Button
         view.findTarget.addSelectionListener(new SelectionAdapter() {
             void widgetSelected(SelectionEvent se) {
-                println model.delay
                 findAction.run()
             }
         })
@@ -393,6 +416,13 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         */
         menuManager.add(editMenu)
         editMenu.add(reloadAction)
+        editMenu.add(new Separator())
+        editMenu.add(newTestCaseAction)
+        editMenu.add(removeTestCaseAction)
+        editMenu.add(new Separator())
+        editMenu.add(insertCommandAction)
+        editMenu.add(addCommandAction)
+        editMenu.add(removeCommandAction)
         /*
         editMenu.add(undoAction)
         editMenu.add(redoAction)

@@ -96,8 +96,10 @@ class PlayCurrentAction extends Action {
     }
     
     private void onPause() {
-        controller.view.testCasesViewer.table.setEnabled(true)
-        controller.setRunning(RunState.PAUSED)
+        Display.default.asyncExec {
+            controller.view.testCasesViewer.table.setEnabled(true)
+            controller.setRunning(RunState.PAUSED)
+        }
     }
     
     private void onComplete(TestCaseModel testCase) {

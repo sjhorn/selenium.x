@@ -13,7 +13,7 @@ class TestCaseModel {
     String selenese = ""
     String name = "Untitled"
     String baseURL = ""
-    ObservableList tests = [ new TestModel(command:"hello", target:"what", value:"cool") ]
+    ObservableList tests = [ new TestModel(command:"", target:"", value:"") ]
     TestModel selectedTest
     int currentTest
     TestState state = TestState.UNKNOWN
