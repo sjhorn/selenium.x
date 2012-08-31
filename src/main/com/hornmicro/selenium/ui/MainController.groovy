@@ -6,17 +6,22 @@ import org.codehaus.groovy.runtime.StackTraceUtils
 import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.PojoProperties
+import org.eclipse.core.databinding.observable.list.IObservableList
+import org.eclipse.core.databinding.observable.map.IObservableMap
 import org.eclipse.core.databinding.observable.value.ComputedValue
 import org.eclipse.core.databinding.observable.value.WritableValue
+import org.eclipse.core.databinding.property.Properties
+import org.eclipse.core.databinding.property.value.IValueProperty
 import org.eclipse.jface.action.Action
 import org.eclipse.jface.action.MenuManager
 import org.eclipse.jface.action.Separator
 import org.eclipse.jface.databinding.swt.WidgetProperties
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider
+import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider
 import org.eclipse.jface.databinding.viewers.ViewerProperties
-import org.eclipse.jface.databinding.viewers.ViewerSupport
 import org.eclipse.jface.viewers.StructuredSelection
-import org.eclipse.jface.viewers.StyledCellLabelProvider
+import org.eclipse.jface.viewers.StructuredViewer
 import org.eclipse.jface.viewers.ViewerCell
 import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
@@ -154,7 +159,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         return view
     }
     
-    class TestLabelProvider extends StyledCellLabelProvider {
+    class TestLabelProvider extends StyledObservableLabelProvider {
         void update(ViewerCell cell) {
             def col = cell.columnIndex
             def test = cell.element
@@ -239,12 +244,12 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         )
         
         // Connect testCases to Test Case table
-        ViewerSupport.bind(
+        bind(
             view.testCasesViewer,
             BeanProperties.list("testCases", ObservableList).observe(model), // list of testCases
-            BeanProperties.values(["name"] as String[]) // labels
+            BeanProperties.values(["name"] as String[]), // labels
+            new TestLabelProvider()
         )
-        view.testCasesViewer.setLabelProvider(new TestLabelProvider())
         
         dbc.bindValue(
             WidgetProperties.text().observe(view.runs),
@@ -260,12 +265,12 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         IViewerObservableValue testCaseSelection = ViewerProperties.singleSelection().observe(view.testCasesViewer)
         
         // Connect testCase selection to Table of commands
-        ViewerSupport.bind(
+        bind(
             view.testCaseViewer,
             BeanProperties.list("tests", ObservableList).observeDetail(testCaseSelection),
-            BeanProperties.values(["command", "target", "value"] as String[]) // labels
+            BeanProperties.values(["command", "target", "value"] as String[]), // labels
+            new TestLabelProvider()
         )
-        view.testCaseViewer.setLabelProvider(new TestLabelProvider())
         
         // Connect the current test case selection to the TestSuite model. 
         dbc.bindValue(
@@ -448,6 +453,17 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         StackTraceUtils.deepSanitize(e)
         e.printStackTrace()
     }
-
+    
+    @CompileStatic
+    static void bind(StructuredViewer viewer, IObservableList input, IValueProperty[] labelProperties, StyledObservableLabelProvider labelProvider) {
+        ObservableListContentProvider contentProvider = new ObservableListContentProvider()
+        if (viewer.getInput() != null)
+            viewer.setInput(null);
+        viewer.setContentProvider(contentProvider)
+        labelProvider.setObservableMap(Properties.observeEach(contentProvider.getKnownElements(), labelProperties))
+        viewer.setLabelProvider(labelProvider)
+        if (input != null)
+            viewer.setInput(input)
+    }
 }
 
