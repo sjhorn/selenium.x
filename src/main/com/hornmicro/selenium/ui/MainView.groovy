@@ -272,7 +272,7 @@ class MainView extends Composite {
         Composite tableHolder = new Composite(tabFolder, SWT.NONE)
         tableHolder.layout = new MigLayout("inset 2","[][grow][]", "[fill, grow][][][][]")
         
-        testCaseViewer = new TableViewer(tableHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER)
+        testCaseViewer = new TableViewer(tableHolder, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI)
         Table table = testCaseViewer.table 
         table.layoutData = "span 3, growx, wrap, hmax 100%-100"
         table.linesVisible = true

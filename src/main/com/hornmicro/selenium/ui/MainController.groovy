@@ -7,7 +7,6 @@ import org.eclipse.core.databinding.DataBindingContext
 import org.eclipse.core.databinding.beans.BeanProperties
 import org.eclipse.core.databinding.beans.PojoProperties
 import org.eclipse.core.databinding.observable.list.IObservableList
-import org.eclipse.core.databinding.observable.map.IObservableMap
 import org.eclipse.core.databinding.observable.value.ComputedValue
 import org.eclipse.core.databinding.observable.value.WritableValue
 import org.eclipse.core.databinding.property.Properties
@@ -18,7 +17,6 @@ import org.eclipse.jface.action.Separator
 import org.eclipse.jface.databinding.swt.WidgetProperties
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider
-import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider
 import org.eclipse.jface.databinding.viewers.ViewerProperties
 import org.eclipse.jface.viewers.StructuredSelection
 import org.eclipse.jface.viewers.StructuredViewer
@@ -27,6 +25,7 @@ import org.eclipse.jface.window.ApplicationWindow
 import org.eclipse.jface.window.Window
 import org.eclipse.jface.window.Window.IExceptionHandler
 import org.eclipse.swt.SWT
+import org.eclipse.swt.dnd.Clipboard
 import org.eclipse.swt.events.DisposeEvent
 import org.eclipse.swt.events.DisposeListener
 import org.eclipse.swt.events.MouseAdapter
@@ -41,6 +40,7 @@ import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Shell
 
 import com.hornmicro.selenium.actions.AddCommandAction
+import com.hornmicro.selenium.actions.CopyAction
 import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.FindAction
 import com.hornmicro.selenium.actions.InsertCommandAction
@@ -66,11 +66,13 @@ import com.hornmicro.selenium.model.TestSuiteModel
 
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
-    private Action newTestSuiteAction
-    private Action saveTestSuiteAsAction
-    private Action saveTestSuiteAction
-    private Action saveTestCaseAsAction
-    private Action saveTestCaseAction
+    Clipboard clipBoard
+    IObservableList commandSelection
+    Action newTestSuiteAction
+    Action saveTestSuiteAsAction
+    Action saveTestSuiteAction
+    Action saveTestCaseAsAction
+    Action saveTestCaseAction
     Action executeAction
     Action openAction
     Action findAction
@@ -80,6 +82,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     Action addCommandAction
     Action insertCommandAction
     Action removeCommandAction
+    
+    Action copyAction
+    
     PauseResumeAction pauseResumeAction
     PlayCurrentAction playCurrentAction
     Action playAllAction
@@ -91,7 +96,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     
     public MainController() {
         super(null)
-        
+        clipBoard = new Clipboard(Display.getDefault())
         openAction = new OpenAction(this)
         saveTestCaseAction = new SaveTestCaseAction(this)
         saveTestCaseAsAction = new SaveTestCaseAsAction(this)
@@ -106,6 +111,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         reloadAction = new ReloadAction(this)
         newTestCaseAction = new NewTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
+        
+        copyAction = new CopyAction(this)
+        
         
         addCommandAction = new AddCommandAction(this)
         insertCommandAction = new InsertCommandAction(this)
@@ -131,6 +139,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     
     @CompileStatic
     void widgetDisposed(DisposeEvent de) {
+        clipBoard.dispose()
         DriveTest.dispose()
         Resources.dispose()
     }
@@ -290,6 +299,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
             BeanProperties.value("baseURL", String).observeDetail(testCaseSelection)
         )
 
+        commandSelection = ViewerProperties.multipleSelection().observe(view.testCaseViewer)
+        
         // Observe the current command selection
         IViewerObservableValue selection = ViewerProperties.singleSelection().observe(view.testCaseViewer)
         
@@ -368,20 +379,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                 }
             }
         )
-        
-        // Watch for test state change and let the lableprovider know
-        dbc.bindValue(
-            BeanProperties.value("selectedTestCase", TestCaseModel)
-                            .value("selectedTest", TestModel)
-                            .observe(model),
-            new WritableValue() {
-                void doSetValue(Object value) {
-                    if(value) {
-                        view.testCaseViewer.refresh() // refresh the labels and reveal
-                    }
-                }
-            }
-        )
     }
     
     void reload() {
@@ -422,6 +419,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         menuManager.add(editMenu)
         editMenu.add(reloadAction)
         editMenu.add(new Separator())
+        editMenu.add(copyAction)
+        editMenu.add(new Separator())
         editMenu.add(newTestCaseAction)
         editMenu.add(removeTestCaseAction)
         editMenu.add(new Separator())
@@ -432,7 +431,6 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         editMenu.add(undoAction)
         editMenu.add(redoAction)
         editMenu.add(new Separator())
-        editMenu.add(copyAction)
         editMenu.add(cutAction)
         editMenu.add(pasteAction)
         editMenu.add(new Separator())
