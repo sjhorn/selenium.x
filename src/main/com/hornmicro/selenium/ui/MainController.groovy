@@ -41,12 +41,14 @@ import org.eclipse.swt.widgets.Shell
 
 import com.hornmicro.selenium.actions.AddCommandAction
 import com.hornmicro.selenium.actions.CopyAction
+import com.hornmicro.selenium.actions.CutAction
 import com.hornmicro.selenium.actions.ExecuteAction
 import com.hornmicro.selenium.actions.FindAction
 import com.hornmicro.selenium.actions.InsertCommandAction
 import com.hornmicro.selenium.actions.NewTestCaseAction
 import com.hornmicro.selenium.actions.NewTestSuiteAction
 import com.hornmicro.selenium.actions.OpenAction
+import com.hornmicro.selenium.actions.PasteAction
 import com.hornmicro.selenium.actions.PauseResumeAction
 import com.hornmicro.selenium.actions.PlayAllAction
 import com.hornmicro.selenium.actions.PlayCurrentAction
@@ -84,6 +86,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     Action removeCommandAction
     
     Action copyAction
+    Action cutAction
+    Action pasteAction
     
     PauseResumeAction pauseResumeAction
     PlayCurrentAction playCurrentAction
@@ -112,8 +116,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         newTestCaseAction = new NewTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
         
+        cutAction = new CutAction(this)
         copyAction = new CopyAction(this)
-        
+        pasteAction = new PasteAction(this)
         
         addCommandAction = new AddCommandAction(this)
         insertCommandAction = new InsertCommandAction(this)
@@ -419,7 +424,9 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         menuManager.add(editMenu)
         editMenu.add(reloadAction)
         editMenu.add(new Separator())
+        editMenu.add(cutAction)
         editMenu.add(copyAction)
+        editMenu.add(pasteAction)
         editMenu.add(new Separator())
         editMenu.add(newTestCaseAction)
         editMenu.add(removeTestCaseAction)
