@@ -18,6 +18,8 @@ import org.eclipse.jface.databinding.swt.WidgetProperties
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider
 import org.eclipse.jface.databinding.viewers.ViewerProperties
+import org.eclipse.jface.fieldassist.AutoCompleteField
+import org.eclipse.jface.fieldassist.ComboContentAdapter
 import org.eclipse.jface.viewers.StructuredSelection
 import org.eclipse.jface.viewers.StructuredViewer
 import org.eclipse.jface.viewers.ViewerCell
@@ -33,6 +35,7 @@ import org.eclipse.swt.events.MouseEvent
 import org.eclipse.swt.events.SelectionAdapter
 import org.eclipse.swt.events.SelectionEvent
 import org.eclipse.swt.graphics.Color
+import org.eclipse.swt.graphics.Rectangle
 import org.eclipse.swt.layout.FillLayout
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.swt.widgets.Control
@@ -60,6 +63,7 @@ import com.hornmicro.selenium.actions.SaveTestCaseAsAction
 import com.hornmicro.selenium.actions.SaveTestSuiteAction
 import com.hornmicro.selenium.actions.SaveTestSuiteAsAction
 import com.hornmicro.selenium.driver.DriveTest
+import com.hornmicro.selenium.driver.SeleneseAPI
 import com.hornmicro.selenium.model.RunState
 import com.hornmicro.selenium.model.TestCaseModel
 import com.hornmicro.selenium.model.TestModel
@@ -68,6 +72,7 @@ import com.hornmicro.selenium.model.TestSuiteModel
 
 
 class MainController extends ApplicationWindow implements Runnable, Window.IExceptionHandler, DisposeListener {
+    static SeleneseAPI seleneseAPI = new SeleneseAPI()
     Clipboard clipBoard
     IObservableList commandSelection
     Action newTestSuiteAction
@@ -154,8 +159,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         super.configureShell(shell)
         shell.text = "selenium.x"
         shell.setImage(Resources.getImage("gfx/Selenium_x.png"))
-        int displayWidth = Display.getDefault().getBounds().width
-        shell.setBounds(displayWidth - 740, 1, 740, 700)
+        Rectangle displayBounds = Display.getDefault().getBounds()
+        shell.setBounds(displayBounds.width - 740, 1, 740, 1000 > displayBounds.height ? displayBounds.height : 1000)
         shell.addDisposeListener(this)
     }
     
@@ -315,9 +320,25 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         )
         
         // Two-way link the current command to command text
+        def commandSelection = WidgetProperties.selection().observe(view.command)
         dbc.bindValue(
-            WidgetProperties.selection().observe(view.command),
+            commandSelection,
             PojoProperties.value("command", String).observeDetail(selection)
+        )
+        dbc.bindList(
+            WidgetProperties.items().observe(view.command),
+            Properties.selfList().observe(seleneseAPI.commandNames)
+        )
+        new AutoCompleteField(view.command, new ComboContentAdapter(), seleneseAPI.commandNames as String[])
+        dbc.bindValue(
+            commandSelection,
+            new WritableValue() {
+                void doSetValue(Object sel) {
+                    if(sel) {
+                        view.setReferenceHTML(seleneseAPI.getReferenceFor(sel) ?: '')
+                    }
+                }
+            }
         )
         
         // Two-way link the current command to target text

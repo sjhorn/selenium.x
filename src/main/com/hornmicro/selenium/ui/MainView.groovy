@@ -3,13 +3,13 @@ package com.hornmicro.selenium.ui
 import groovy.transform.CompileStatic
 import net.miginfocom.swt.MigLayout
 
+import org.eclipse.jface.viewers.ComboViewer
 import org.eclipse.jface.viewers.TableViewer
 import org.eclipse.swt.SWT
 import org.eclipse.swt.browser.Browser
 import org.eclipse.swt.custom.SashForm
 import org.eclipse.swt.events.ControlAdapter
 import org.eclipse.swt.events.ControlEvent
-import org.eclipse.swt.graphics.RGB
 import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.widgets.Combo
 import org.eclipse.swt.widgets.Composite
@@ -28,10 +28,15 @@ import com.novocode.naf.swt.custom.LiveSashForm
 
 @CompileStatic
 class MainView extends Composite {
-    private Label removeTest
-    private Label addTest
-    private Scale scale
-    private ToolItem playAll
+    TabItem refti
+    TabItem logti
+    TabFolder footerTabs
+    final String style = "<style>body { font-family: 'Lucida Grande', Helvetica, Arial; font-size: 10pt }</style>"
+    Browser reference
+    Label removeTest
+    Label addTest
+    Scale scale
+    ToolItem playAll
     Label greenBar
     Label failures
     Label runs
@@ -95,6 +100,7 @@ class MainView extends Composite {
         }
         
         def doLog(String text,String color) {
+            view.footerTabs.selection = [view.logti] as TabItem[]
             text = text.replaceAll('\"','\\\\"')
             text = text.replaceAll("\n",'\\\\n')
             try {
@@ -264,7 +270,6 @@ class MainView extends Composite {
         // Test Case
         //
         TabFolder tabFolder = new TabFolder (form, SWT.BORDER)
-        //tabFolder.setBackground(Display.default.getSystemColor(SWT.COLOR_GREEN))
         
         // Table
         TabItem tbItem = new TabItem (tabFolder, SWT.NONE)
@@ -321,26 +326,24 @@ class MainView extends Composite {
         
         form.weights = [30, 70]
         
-        final String style = "<style>body { font-family: 'Lucida Grande', Helvetica, Arial; font-size: 10pt }</style>"
-        
-        TabFolder footerTabs = new TabFolder(vform, SWT.BORDER)
-        TabItem logti = new TabItem(footerTabs, SWT.NONE)
+        footerTabs = new TabFolder(vform, SWT.BORDER)
+        logti = new TabItem(footerTabs, SWT.NONE)
         logti.text = "Log"
         logControl = new Browser(footerTabs, SWT.BORDER)
         logControl.text = style
         logti.control = logControl
         
-        TabItem refti = new TabItem(footerTabs, SWT.NONE)
+        refti = new TabItem(footerTabs, SWT.NONE)
         refti.text = "Reference"
-        Browser reference = new Browser(footerTabs, SWT.BORDER)
-        reference.text = style+"<h2>Reference todo...</h2>"
+        reference = new Browser(footerTabs, SWT.BORDER)
+        reference.text = ""
         refti.control = reference
         
-        TabItem uielti = new TabItem(footerTabs, SWT.NONE)
-        uielti.text = "UI-Element"
-        Browser uiElement = new Browser(footerTabs, SWT.BORDER)
-        uiElement.text = style+"<h2>UI-Element todo...</h2>"
-        uielti.control = uiElement
+//        TabItem uielti = new TabItem(footerTabs, SWT.NONE)
+//        uielti.text = "UI-Element"
+//        Browser uiElement = new Browser(footerTabs, SWT.BORDER)
+//        uiElement.text = style+"<h2>UI-Element todo...</h2>"
+//        uielti.control = uiElement
         
         footerTabs.pack()
         
@@ -349,5 +352,8 @@ class MainView extends Composite {
         layout()
     }
     
-    
+    void setReferenceHTML(String html) {
+        footerTabs.selection = [refti] as TabItem[]
+        reference.text = style+html
+    }
 }
