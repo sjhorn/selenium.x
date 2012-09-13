@@ -1,0 +1,5 @@
+#!/bin/sh
+
+ABSPATH=$(cd "$(dirname "$0")"; pwd)
+
+"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator" -SimulateApplication ${ABSPATH}/iWebDriver_iphone.app/iWebDriver &
