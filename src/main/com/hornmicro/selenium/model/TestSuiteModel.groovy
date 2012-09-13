@@ -8,7 +8,7 @@ import org.ccil.cowan.tagsoup.Parser
 @Bindable
 class TestSuiteModel {
     
-    String browser = "safari"
+    String browser = "htmlunit"
     File file
     String name = "Test Suite"
     ObservableList testCases = new ObservableList([ new TestCaseModel() ])

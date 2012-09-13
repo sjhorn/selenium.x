@@ -8,8 +8,10 @@ import java.util.concurrent.TimeUnit
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
+import org.openqa.selenium.android.AndroidDriver;
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
@@ -35,9 +37,11 @@ class DriveTest {
     
     static void loadDriver(String browser) {
         switch(browser.toLowerCase()) {
+            case 'htmlunit':
+                drivers['htmlunit'] = new HtmlUnitDriver(true)
+                break
+            
             case 'chrome':
-            
-            
                 //Replace these with http://www.vogella.com/articles/JavaPreferences/article.html
                 System.setProperty("webdriver.chrome.driver", "drivers/chromedriver")
                 DesiredCapabilities capabilities = DesiredCapabilities.chrome();
@@ -66,10 +70,14 @@ class DriveTest {
                 
             case 'ie8':
                 DesiredCapabilities ieCapabilities = DesiredCapabilities.internetExplorer()
-                drivers['ie8'] = new RemoteWebDriver(new URL("http://10.0.7.165:4444/wd/hub"), ieCapabilities)
-                new InternetExplorerDriver()
+                drivers['ie8'] = new RemoteWebDriver(new URL("http://172.16.129.129:4444/wd/hub"), ieCapabilities)
+                //new RemoteWebDriver(new URL("http://10.0.7.165:4444/wd/hub"), ieCapabilities)
                 break
             
+            case 'android':
+                drivers['android'] = new AndroidDriver()
+                break
+                
             default:
                 throw new RuntimeException("$browser Not supported...yet")
         }

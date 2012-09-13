@@ -241,14 +241,17 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         dbc.bindValue(
             new ComputedValue() {
                 Object calculate() {
+                    def htmlunit = ToolbarProperties.selection().observe(view.htmlunit) 
                     def firefox = ToolbarProperties.selection().observe(view.firefox) 
                     def chrome = ToolbarProperties.selection().observe(view.chrome)
                     def safari = ToolbarProperties.selection().observe(view.safari)
                     def opera = ToolbarProperties.selection().observe(view.opera)
                     def iphone = ToolbarProperties.selection().observe(view.iphone)
                     def ie8 = ToolbarProperties.selection().observe(view.ie8)
-                    
-                    if(firefox.getValue()) {
+                    def android = ToolbarProperties.selection().observe(view.android)
+                    if(htmlunit.getValue()) {
+                        return "htmlunit"
+                    } else if(firefox.getValue()) {
                         return "firefox"
                     } else if(chrome.getValue()) {
                         return "chrome"
@@ -260,6 +263,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                         return "iphone"
                     } else if(ie8.getValue()) {
                         return "ie8"
+                    } else if(android.getValue()) {
+                        return "android"
                     }
                     return "chrome"
                 }

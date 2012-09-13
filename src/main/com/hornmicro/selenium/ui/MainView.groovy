@@ -42,6 +42,7 @@ class MainView extends Composite {
     Label runs
     ToolItem pauseResume
     ToolItem playCurrent
+    ToolItem htmlunit
     ToolItem firefox
     ToolItem chrome
     ToolItem ie8
@@ -166,49 +167,63 @@ class MainView extends Composite {
         
         playAll = new ToolItem (toolBar, SWT.PUSH)
         playAll.image = Resources.getImage("gfx/PlayAll.png")
+        playAll.text = "Play All"
         
         playCurrent = new ToolItem (toolBar, SWT.PUSH)
         playCurrent.image = Resources.getImage("gfx/PlayOne.png")
+        playCurrent.text = "Play One"
         
         pauseResume = new ToolItem (toolBar, SWT.PUSH)
         pauseResume.image = Resources.getImage("gfx/Pause.png")
+        pauseResume.text = "Pause"
         
         item = new ToolItem (toolBar, SWT.PUSH)
         item.image = Resources.getImage("gfx/Step.png")
         item.enabled = false
+        item.text = "Step"
         
         item = new ToolItem (toolBar, SWT.SEPARATOR)
         
+        htmlunit = new ToolItem (toolBar, SWT.RADIO)
+        htmlunit.image = Resources.getImage("gfx/htmlunit.png")
+        htmlunit.selection = true
+        htmlunit.text = "htmlunit"
+        
         firefox = new ToolItem (toolBar, SWT.RADIO)
         firefox.image = Resources.getImage("gfx/firefox.png")
+        firefox.text = "firefox"
         
         chrome = new ToolItem (toolBar, SWT.RADIO)
         chrome.image = Resources.getImage("gfx/chrome.png")
-        
+        chrome.text = "chrome"
         
         safari = new ToolItem (toolBar, SWT.RADIO)
         safari.image = Resources.getImage("gfx/safari.png")
-        safari.selection = true
+        safari.text = "safari"
         
         opera = new ToolItem (toolBar, SWT.RADIO)
         opera.image = Resources.getImage("gfx/opera.png")
+        opera.text = "opera"
         
         ie8 = new ToolItem (toolBar, SWT.RADIO)
         ie8.image = Resources.getImage("gfx/ie8.png")
+        ie8.text = "IE 8"
         //ie8.enabled = false
         
         ie9 = new ToolItem (toolBar, SWT.RADIO)
         ie9.image = Resources.getImage("gfx/ie9.png")
+        ie9.text = "IE 9"
         ie9.enabled = false
         
         
         
         iphone = new ToolItem (toolBar, SWT.RADIO)
         iphone.image = Resources.getImage("gfx/iphone.png")
+        iphone.text = "iOS"
         
         android = new ToolItem (toolBar, SWT.RADIO)
         android.image = Resources.getImage("gfx/android.png")
-        android.enabled = false
+        android.text = "android"
         
         SashForm vform = new SashForm(this, SWT.VERTICAL)
         vform.layoutData = "span 3, w 100%, wmin 0, hmax 100%-50" // tweak to allow correct layout
