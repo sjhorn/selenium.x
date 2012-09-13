@@ -10,9 +10,12 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.internal.seleniumemulation.ElementFinder
 import org.openqa.selenium.internal.seleniumemulation.JavascriptLibrary
+import org.openqa.selenium.iphone.IPhoneDriver
 import org.openqa.selenium.remote.DesiredCapabilities
+import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.safari.SafariDriver
 
 import com.hornmicro.selenium.driver.api.AccessorResult
@@ -33,7 +36,10 @@ class DriveTest {
     static void loadDriver(String browser) {
         switch(browser.toLowerCase()) {
             case 'chrome':
-                System.setProperty("webdriver.chrome.driver", "libs/chromedriver")
+            
+            
+                //Replace these with http://www.vogella.com/articles/JavaPreferences/article.html
+                System.setProperty("webdriver.chrome.driver", "drivers/chromedriver")
                 DesiredCapabilities capabilities = DesiredCapabilities.chrome();
                 capabilities.setCapability("chrome.binary", "/Applications/Chromium.app/Contents/MacOS/Chromium");
             
@@ -51,7 +57,19 @@ class DriveTest {
             case 'opera':
                 drivers['opera'] = new OperaDriver()
                 break
+            
+            case 'iphone':
+            
+                // Replace these with http://www.vogella.com/articles/JavaPreferences/article.html
+                drivers['iphone'] = new IPhoneDriver(new URL("http://10.0.7.111:3001/wd/hub"))
+                break
                 
+            case 'ie8':
+                DesiredCapabilities ieCapabilities = DesiredCapabilities.internetExplorer()
+                drivers['ie8'] = new RemoteWebDriver(new URL("http://10.0.7.165:4444/wd/hub"), ieCapabilities)
+                new InternetExplorerDriver()
+                break
+            
             default:
                 throw new RuntimeException("$browser Not supported...yet")
         }
@@ -76,9 +94,7 @@ class DriveTest {
         SeleniumInstance si = seleniums[driver]
         
         // If the baseUrl changes 
-        println "Comparing $si.baseUrl with $baseUrl"
         if(si.baseUrl != baseUrl) {
-            println "Making new instance "
             seleniums[driver] = new SeleniumInstance(baseUrl, driver)
         }
         return seleniums[driver]
@@ -94,7 +110,6 @@ class DriveTest {
         
         // Ensure the current window is selected in safari driver
         if(test.command == "open") {
-            println ">>>> Focusing window now"
             selenium.selectWindow("null")   
         }
         
@@ -102,7 +117,6 @@ class DriveTest {
         CommandHandler handler = chf.getCommandHandler(command.command)
         command.target = test.target
         command.value = test.value
-        println "Running ${command}"
         
         if(test.target)
             highlightElement(driver, test.target)
@@ -111,7 +125,6 @@ class DriveTest {
         if(res instanceof AssertResult) {
             if(res.passed) {
                 test.state = TestState.SUCCESS
-                //println "Passed"
             } else {
                 test.state = TestState.FAILED
                 System.err.println("Failed [$res.failureMessage]")

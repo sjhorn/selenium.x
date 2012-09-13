@@ -23,6 +23,8 @@ class AddCommandAction extends Action {
             TestModel testModel = new TestModel(command:"", target:"", value:"")
             testCase.tests += testModel
             testCase.selectedTest = testModel
+            
+            //controller.view.
         }
     }
 }

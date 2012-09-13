@@ -26,6 +26,8 @@ class InsertCommandAction extends Action {
                 index = 0
             }
             testCase.tests.add(index, new TestModel(command:"", target:"", value:""))
+            controller.view.testCaseViewer.refresh()
+            
             testCase.selectedTest = testCase.tests[index]
         }
     }

@@ -195,7 +195,7 @@ class MainView extends Composite {
         
         ie8 = new ToolItem (toolBar, SWT.RADIO)
         ie8.image = Resources.getImage("gfx/ie8.png")
-        ie8.enabled = false
+        //ie8.enabled = false
         
         ie9 = new ToolItem (toolBar, SWT.RADIO)
         ie9.image = Resources.getImage("gfx/ie9.png")
@@ -205,7 +205,6 @@ class MainView extends Composite {
         
         iphone = new ToolItem (toolBar, SWT.RADIO)
         iphone.image = Resources.getImage("gfx/iphone.png")
-        iphone.enabled = false
         
         android = new ToolItem (toolBar, SWT.RADIO)
         android.image = Resources.getImage("gfx/android.png")

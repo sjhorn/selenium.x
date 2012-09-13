@@ -58,6 +58,7 @@ import com.hornmicro.selenium.actions.PlayCurrentAction
 import com.hornmicro.selenium.actions.ReloadAction
 import com.hornmicro.selenium.actions.RemoveCommandAction
 import com.hornmicro.selenium.actions.RemoveTestCaseAction
+import com.hornmicro.selenium.actions.ResetBrowsersAction
 import com.hornmicro.selenium.actions.SaveTestCaseAction
 import com.hornmicro.selenium.actions.SaveTestCaseAsAction
 import com.hornmicro.selenium.actions.SaveTestSuiteAction
@@ -83,7 +84,10 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
     Action executeAction
     Action openAction
     Action findAction
+    
     Action reloadAction
+    Action resetBrowsersAction
+    
     Action newTestCaseAction
     Action removeTestCaseAction
     Action addCommandAction
@@ -118,6 +122,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         findAction = new FindAction(this)
         
         reloadAction = new ReloadAction(this)
+        resetBrowsersAction = new ResetBrowsersAction()
+        
         newTestCaseAction = new NewTestCaseAction(this)
         removeTestCaseAction = new RemoveTestCaseAction(this)
         
@@ -239,6 +245,8 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                     def chrome = ToolbarProperties.selection().observe(view.chrome)
                     def safari = ToolbarProperties.selection().observe(view.safari)
                     def opera = ToolbarProperties.selection().observe(view.opera)
+                    def iphone = ToolbarProperties.selection().observe(view.iphone)
+                    def ie8 = ToolbarProperties.selection().observe(view.ie8)
                     
                     if(firefox.getValue()) {
                         return "firefox"
@@ -248,6 +256,10 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
                         return "safari"
                     } else if(opera.getValue()) {
                         return "opera"
+                    } else if(iphone.getValue()) {
+                        return "iphone"
+                    } else if(ie8.getValue()) {
+                        return "ie8"
                     }
                     return "chrome"
                 }
@@ -444,6 +456,7 @@ class MainController extends ApplicationWindow implements Runnable, Window.IExce
         */
         menuManager.add(editMenu)
         editMenu.add(reloadAction)
+        editMenu.add(resetBrowsersAction)
         editMenu.add(new Separator())
         editMenu.add(cutAction)
         editMenu.add(copyAction)
