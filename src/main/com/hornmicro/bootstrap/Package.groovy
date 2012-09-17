@@ -57,7 +57,7 @@ class Package {
                 }
             }
             
-            // Add our class files
+            // Add our class f"iles
             new File("bin").eachFileRecurse { file ->
                 if(!file.isDirectory()) {
                     JarEntry jarEntry = new JarEntry(file.path.replaceAll(/^bin\//,""))
@@ -66,20 +66,43 @@ class Package {
                     jar.write(file.readBytes())
                 }
             }
-            
-            // Add gfx/xml etc
-            /*
-            [
-                "gfx/android.png", 
-            ].each { String fileName ->
-                File file = new File(fileName)
-                JarEntry jarEntry = new JarEntry("com/hornmicro/spaceinvaders/${file.name}")
-                jarEntry.setTime(file.lastModified())
-                jar.putNextEntry(jarEntry)
-                jar.write(file.readBytes())
-            }
-            */
             jar.close()
         }
+        
+        // Copy Static assets into app bundle
+        File.metaClass.copyTo = { File dest ->
+            new File(dest, delegate.name).withDataOutputStream { os ->
+                delegate.withDataInputStream { is ->
+                   os << is
+                }
+             }
+        }
+        
+        // Add jar to OSX bundle
+        File javaDest = new File("dist/SeleniumX.app/Contents/Resources/Java/")
+        javaDest.deleteDir()
+        javaDest.mkdirs()
+        new File("dist/SeleniumX.jar").copyTo(javaDest)
+        
+        // gfx, api, drivers
+        [
+            "gfx" : "dist/SeleniumX.app/Contents/Resources/gfx",
+            "api" : "dist/SeleniumX.app/Contents/Resources/api",
+            "drivers" : "dist/SeleniumX.app/Contents/Resources/drivers"
+        ].each { from, to ->
+            new File(to).deleteDir()
+            new File(to).mkdirs()
+            new File(from).eachFile { file ->
+                if(file.isFile()) {
+                    file.copyTo(new File(to))
+                }
+            }
+        }
+        
+        "chmod +x dist/SeleniumX.app/Contents/Resources/drivers/chromedriver".execute()
+        
     }
+    
+    
+    
 }
