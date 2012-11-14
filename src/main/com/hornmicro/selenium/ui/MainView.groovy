@@ -26,12 +26,11 @@ import org.eclipse.swt.widgets.ToolItem
 
 import com.novocode.naf.swt.custom.LiveSashForm
 
-@CompileStatic
 class MainView extends Composite {
     TabItem refti
     TabItem logti
     TabFolder footerTabs
-    final String style = "<style>body { font-family: 'Lucida Grande', Helvetica, Arial; font-size: 10pt }</style>"
+    final String style2 = "<style>body { font-family: 'Lucida Grande', Helvetica, Arial; font-size: 10pt }</style>"
     Browser reference
     Label removeTest
     Label addTest

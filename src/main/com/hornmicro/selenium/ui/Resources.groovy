@@ -1,7 +1,5 @@
 package com.hornmicro.selenium.ui
 
-import groovy.transform.CompileStatic
-import groovy.transform.TypeChecked
 
 import java.util.Map.Entry
 
@@ -10,7 +8,6 @@ import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.graphics.RGB
 import org.eclipse.swt.widgets.Display
 
-@CompileStatic
 class Resources {
     static final Map<String, Image> imageCache = [:]
     static final Map<RGB, Color> colorCache = [:]
